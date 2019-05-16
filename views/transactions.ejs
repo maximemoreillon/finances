@@ -1,0 +1,130 @@
+<html>
+
+<!-- head is information not displayed on the page -->
+<head>
+  <% include partials/head %>
+
+</head>
+
+<!-- Body is what is displayed on the page -->
+<body>
+
+  <div class="wrapper">
+
+    <div class="header">
+      <% include partials/header %>
+    </div>
+
+    <div class="nav">
+      <% include partials/nav %>
+    </div>
+
+    <div class="main">
+
+      <div id="chart"></div>
+
+      <table>
+
+        <tr>
+          <th>Date</th>
+          <th>Transaction</th>
+          <th>Description</th>
+        </tr>
+
+        <!-- iterate over items coming from DB -->
+        <%
+        toLocaleStringOptions = {
+          hour12: false,
+          year:'numeric',
+          month:'2-digit',
+          day: '2-digit',
+        }
+        %>
+        <% for(var i=0; i<data.length; i++) { %>
+
+          <tr>
+            <td><%= data[i].date %></td>
+            <td><%= data[i].transaction_amount %></td>
+            <td><%= data[i].description %></td>
+          </tr>
+
+        <% } %>
+
+      </table>
+
+    </div> <!-- end of main -->
+
+    <div class="footer">
+      <% include partials/footer %>
+    </div>
+
+  </div>
+
+  <script type="text/javascript" src="js/expense_categories.js">
+
+  </script>
+  <script>
+
+  var columns = [];
+
+  <%
+  for(var data_index=0; data_index<data.length; data_index++) {
+    // Check if entry is an expense
+    if(data[data_index].transaction_amount < 0) {
+  %>
+
+    // Check what category the expense belongs to from its description
+    // If no category found, category is the description
+    var category_found = false;
+    var category;
+
+    for(var category_idex=0; category_idex<expense_categories.length; category_idex++){
+      for(var keyword_index=0; keyword_index<expense_categories[category_idex].keywords.length; keyword_index++){
+        if('<%= data[data_index].description %>'.includes(expense_categories[category_idex].keywords[keyword_index])){
+          category_found = true;
+          category = expense_categories[category_idex].label;
+        }
+      }
+    }
+    
+    if(!category_found){
+      category = '<%= data[data_index].description %>';
+    }
+
+    // Check if a column already exist for the given category
+    // if so, append data to the column
+    // if not, create a column
+    column_already_exists = false;
+    for(var column_index=0; column_index<columns.length; column_index++){
+      // If a column already has the given label
+      if(columns[column_index][0] === category){
+        column_already_exists = true;
+        columns[column_index].push(<%= -data[data_index].transaction_amount %>)
+      }
+    }
+
+    if(!column_already_exists){
+      columns.push([category, <%= -data[data_index].transaction_amount %>])
+    }
+
+  <%
+    }
+  }
+  %>
+
+  console.log(columns);
+
+
+  var chart = c3.generate({
+    bindto: '#chart',
+    data: {
+      columns: columns,
+      type: 'pie',
+    },
+  });
+
+  </script>
+
+</body>
+
+</html>

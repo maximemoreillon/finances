@@ -1,0 +1,19 @@
+{
+  "name": "finances",
+  "version": "1.0.0",
+  "description": "",
+  "main": "finances.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "csv-parse": "^4.4.1",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "mongodb": "^3.2.3",
+    "node-schedule": "^1.3.2",
+    "phantom": "^6.2.0"
+  }
+}
