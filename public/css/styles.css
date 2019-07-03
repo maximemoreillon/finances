@@ -1,17 +1,21 @@
 .main, main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  text-align: center;
+}
+
+.main > * , main > * {
+  margin: 25px 0;
 }
 
 #chart {
-  width: 90%;
   height: 50vh;
 }
 
+.table_container{
+  overflow-x:auto;
+}
 
 table {
-  width: 90%;
+  min-width: 100%;
   text-align: center;
   border-collapse: collapse;
 }

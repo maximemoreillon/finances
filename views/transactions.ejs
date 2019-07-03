@@ -22,37 +22,42 @@
     <div class="main">
 
       <div id="chart"></div>
+      <div class="table_container">
 
-      <table>
-
-        <tr>
-          <th>Date</th>
-          <th>Transaction</th>
-          <th>Description</th>
-        </tr>
-
-        <!-- iterate over items coming from DB -->
-        <%
-        toLocaleStringOptions = {
-          hour12: false,
-          year:'numeric',
-          month:'2-digit',
-          day: '2-digit',
-        }
-        %>
-        <% for(var i=0; i<data.length; i++) { %>
+        <table>
 
           <tr>
-            <td><%= data[i].date %></td>
-            <td><%= data[i].transaction_amount %></td>
-            <td><%= data[i].description %></td>
+            <th>Date</th>
+            <th>Transaction</th>
+            <th>Description</th>
+            <th>Ignore</th>
           </tr>
 
-        <% } %>
+          <!-- iterate over items coming from DB -->
+          <%
+          toLocaleStringOptions = {
+            hour12: false,
+            year:'numeric',
+            month:'2-digit',
+            day: '2-digit',
+          }
+          %>
+          <% for(var i=0; i<data.length; i++) { %>
 
-      </table>
+            <tr>
+              <td><%= data[i].date.toLocaleString('Ja-JP', toLocaleStringOptions) %></td>
+              <td><%= data[i].transaction_amount %> 円</td>
+              <td><%= data[i].description %></td>
+              <td>
+                <input type="checkbox" onclick="checkboxClicked(this, '<%= data[i]._id %>')" <%if(data[i].ignore){%> checked <%}%>>
+              </td>
+            </tr>
 
-    </div> <!-- end of main -->
+          <% } %>
+
+        </table>
+      </div>
+    </div><!-- end of main -->
 
     <div class="footer">
       <% include partials/footer %>
@@ -60,22 +65,21 @@
 
   </div>
 
-  <script type="text/javascript" src="js/expense_categories.js">
-
-  </script>
+  <script type="text/javascript" src="js/expense_categories.js"></script>
   <script>
 
   var columns = [];
 
   <%
   for(var data_index=0; data_index<data.length; data_index++) {
-    // Check if entry is an expense
-    if(data[data_index].transaction_amount < 0) {
+    // Check if entry is an unignored expense
+    if(data[data_index].transaction_amount < 0 && !data[data_index].ignore) {
   %>
 
     // Check what category the expense belongs to from its description
     // If no category found, category is the description
     var category_found = false;
+    var ignore = false; // some expenses must be ignored (reimbursed by company)
     var category;
 
     for(var category_idex=0; category_idex<expense_categories.length; category_idex++){
@@ -83,36 +87,35 @@
         if('<%= data[data_index].description %>'.includes(expense_categories[category_idex].keywords[keyword_index])){
           category_found = true;
           category = expense_categories[category_idex].label;
+          ignore = expense_categories[category_idex].ignore;
         }
       }
     }
-    
-    if(!category_found){
-      category = '<%= data[data_index].description %>';
-    }
 
-    // Check if a column already exist for the given category
-    // if so, append data to the column
-    // if not, create a column
-    column_already_exists = false;
-    for(var column_index=0; column_index<columns.length; column_index++){
-      // If a column already has the given label
-      if(columns[column_index][0] === category){
-        column_already_exists = true;
-        columns[column_index].push(<%= -data[data_index].transaction_amount %>)
+    // If category is ignored, don't do anything
+    if(!ignore){
+      if(!category_found){
+        category = '<%= data[data_index].description %>';
+      }
+
+      // Check if a column already exist for the given category
+      // if so, append data to the column
+      // if not, create a column
+      column_already_exists = false;
+      for(var column_index=0; column_index<columns.length; column_index++){
+        // If a column already has the given label
+        if(columns[column_index][0] === category){
+          column_already_exists = true;
+          columns[column_index].push(<%= -data[data_index].transaction_amount %>)
+        }
+      }
+
+      if(!column_already_exists){
+        columns.push([category, <%= -data[data_index].transaction_amount %>])
       }
     }
-
-    if(!column_already_exists){
-      columns.push([category, <%= -data[data_index].transaction_amount %>])
-    }
-
-  <%
-    }
-  }
-  %>
-
-  console.log(columns);
+  <% }
+  } %>
 
 
   var chart = c3.generate({
@@ -123,6 +126,45 @@
     },
   });
 
+  </script>
+
+  <script type="text/javascript">
+    function checkboxClicked(checkbox, _id){
+      console.log('<%= update_url %>');
+      console.log(checkbox.checked);
+      console.log(_id);
+
+      //open_loader();
+
+
+
+      // Data sent to the server
+      const Data = {
+        _id: _id,
+        properties: {ignore: checkbox.checked},
+      }
+
+      // Execute request
+      var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+      xmlhttp.onreadystatechange = function() {
+        if(xmlhttp.readyState === 4){
+          if(xmlhttp.status === 200) {
+            // Request was successful
+            //close_loader_success();
+            console.log("POST OK")
+            location.reload();
+
+          }
+          else {
+            // request failed
+            //close_loader_error();
+          }
+        }
+      }
+      xmlhttp.open("POST", '<%= update_url %>');
+      xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      xmlhttp.send(JSON.stringify(Data));
+    }
   </script>
 
 </body>
