@@ -4,11 +4,14 @@ const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const expressSession = require('express-session')
+const cookieSession = require('cookie-session')
+const cors = require('cors')
 
 // Custom modules
 const credentials = require('../common/credentials');
-const misc_config = require('./config/misc_config');
+const misc = require('../common/misc');
+
+const port = 8086;
 const DB_config = require('./config/db_config');
 
 // Set timezone
@@ -25,21 +28,25 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.set('views', path.join(__dirname, 'views'));
+
+app.use(express.static(path.join(__dirname, 'dist')));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(expressSession({
-    secret: credentials.session_secret,
-    resave: false,
-    saveUninitialized: true
+
+app.use(cookieSession({
+  name: 'session',
+  secret: credentials.session_secret,
+  maxAge: 253402300000000,
+}));
+app.use(cors({
+  origin: misc.cors_origins,
+  credentials: true,
 }));
 
 // Express routes
 function checkAuth(req, res, next) {
-  if (!req.session.user_id) {
-    res.redirect('/login');
-  }
-  else {
-    next();
-  }
+
+  if (!req.session.user_id) res.redirect('/login');
+  else next();
 }
 
 app.get('/login', function(req, res) {
@@ -53,10 +60,7 @@ app.post('/login', function (req, res) {
     req.session.user_id = 1;
     res.redirect('/');
   }
-  else {
-    // Improve this!
-    res.render('login.ejs', {error_message: "Wrong username/password"} );
-  }
+  else res.render('login.ejs', {error_message: "Wrong username/password"} );
 });
 
 app.get('/logout', function (req, res) {
@@ -64,7 +68,73 @@ app.get('/logout', function (req, res) {
   res.redirect('/');
 });
 
-app.get('/',checkAuth, function(req, res) {
+// NEW API routes
+app.post('/get_balance_history',checkAuth, function(req, res) {
+  MongoClient.connect(DB_config.DB_URL, { useNewUrlParser: true }, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db(DB_config.DB_name);
+    dbo.collection(DB_config.balance_collection_name).find({}).toArray(function(err, find_result){
+      if (err) throw err;
+      db.close();
+      res.send(find_result);
+    });
+  });
+});
+
+app.post('/get_current_balance',checkAuth, function(req, res) {
+  MongoClient.connect(DB_config.DB_URL, { useNewUrlParser: true }, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db(DB_config.DB_name);
+    dbo.collection(DB_config.balance_collection_name).find({}).sort({date: -1}).limit(1).toArray(function(err, find_result){
+      if (err) throw err;
+      db.close();
+      res.send(find_result[0].balance);
+    });
+  });
+})
+
+
+app.post('/credit_card_transactions',checkAuth, function(req, res) {
+  MongoClient.connect(DB_config.DB_URL, { useNewUrlParser: true }, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db(DB_config.DB_name);
+    dbo.collection(DB_config.credit_card_transactions_collection_name).find({}).toArray(function(err, find_result){
+      if (err) throw err;
+      db.close();
+      res.send(find_result);
+    });
+  });
+});
+
+app.post('/bank_account_transactions',checkAuth, function(req, res) {
+  MongoClient.connect(DB_config.DB_URL, { useNewUrlParser: true }, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db(DB_config.DB_name);
+    dbo.collection(DB_config.bank_account_transactions_collection_name).find({}).toArray(function(err, find_result){
+      if (err) throw err;
+      db.close();
+      res.send(find_result);
+    });
+  });
+});
+
+
+// DEV ROUTES
+app.get('/delete_invalid_balance_entries',checkAuth, function(req, res) {
+  MongoClient.connect(DB_config.DB_URL, { useNewUrlParser: true }, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db(DB_config.DB_name);
+    var query = { balance: null };
+    dbo.collection(DB_config.balance_collection_name).deleteMany(query, function(err, result) {
+      if (err) throw err;
+      db.close();
+      res.send(result);
+    });
+  });
+});
+
+// LEGACY API routes
+app.get('/balance_history',checkAuth, function(req, res) {
   MongoClient.connect(DB_config.DB_URL, { useNewUrlParser: true }, function(err, db) {
     if (err) throw err;
     var dbo = db.db(DB_config.DB_name);
@@ -83,12 +153,12 @@ app.get('/credit_card_transactions',checkAuth, function(req, res) {
     dbo.collection(DB_config.credit_card_transactions_collection_name).find({}).toArray(function(err, find_result){
       if (err) throw err;
       db.close();
-      res.render('transactions',{data:find_result, update_url: "/credit_card_transactions"});
+      res.render('transactions',{data:find_result, update_url: "/update_credit_card_transaction"});
     });
   });
 });
 
-app.post('/credit_card_transactions',checkAuth, function(req, res) {
+app.post('/update_credit_card_transaction',checkAuth, function(req, res) {
   if(req.body._id && req.body.properties){
     MongoClient.connect(DB_config.DB_URL, { useNewUrlParser: true }, function(err, db) {
       if (err) throw err;
@@ -116,12 +186,12 @@ app.get('/bank_account_transactions',checkAuth, function(req, res) {
     dbo.collection(DB_config.bank_account_transactions_collection_name).find({}).toArray(function(err, find_result){
       if (err) throw err;
       db.close();
-      res.render('transactions',{data:find_result, update_url: "/bank_account_transactions"});
+      res.render('transactions',{data:find_result, update_url: "/update_bank_account_transaction"});
     });
   });
 });
 
-app.post('/bank_account_transactions',checkAuth, function(req, res) {
+app.post('/update_bank_account_transaction',checkAuth, function(req, res) {
   if(req.body._id && req.body.properties){
     MongoClient.connect(DB_config.DB_URL, { useNewUrlParser: true }, function(err, db) {
       if (err) throw err;
@@ -154,7 +224,7 @@ app.get('/transactions',checkAuth, function(req, res) {
       dbo.collection(DB_config.bank_account_transactions_collection_name).find(query).toArray(function(err, brank_find_result){
         if (err) throw err;
         db.close();
-        res.render('transactions',{data:credit_find_result.concat(brank_find_result), update_url: "/bank_account_transactions"});
+        res.render('transactions',{data:credit_find_result.concat(brank_find_result), update_url: "/update_bank_account_transaction"});
       });
     });
   });
@@ -175,6 +245,6 @@ app.get('/api', function(req, res) {
 })
 
 // Start server
-http_server.listen(misc_config.app_port, function(){
-  console.log(`listening on *:${misc_config.app_port}`);
+http_server.listen(port, function(){
+  console.log(`Finances manager listening on *:${port}`);
 });

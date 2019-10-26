@@ -8,5 +8,4 @@ expense_categories = [
   {label: "Electricity", keywords: ["中部電力"]},
   {label: "Phone", keywords: ["日本通信ｂモバイルサービス"]},
   {label: "Gas", keywords: ["東邦ガス　ガス料金"]},
-
 ]

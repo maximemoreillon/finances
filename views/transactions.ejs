@@ -1,12 +1,10 @@
 <html>
 
-<!-- head is information not displayed on the page -->
 <head>
   <% include partials/head %>
 
 </head>
 
-<!-- Body is what is displayed on the page -->
 <body>
 
   <div class="wrapper">
@@ -101,7 +99,7 @@
       // Check if a column already exist for the given category
       // if so, append data to the column
       // if not, create a column
-      column_already_exists = false;
+      var column_already_exists = false;
       for(var column_index=0; column_index<columns.length; column_index++){
         // If a column already has the given label
         if(columns[column_index][0] === category){
@@ -130,9 +128,6 @@
 
   <script type="text/javascript">
     function checkboxClicked(checkbox, _id){
-      console.log('<%= update_url %>');
-      console.log(checkbox.checked);
-      console.log(_id);
 
       //open_loader();
 
