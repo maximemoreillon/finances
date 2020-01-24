@@ -7,13 +7,14 @@ const path = require('path');
 const cookieSession = require('cookie-session')
 const cors = require('cors')
 const history = require('connect-history-api-fallback');
+const mongoose = require("mongoose");
 
 // personal modules
 const authorization_middleware = require('@moreillon/authorization_middleware');
 
 // local modules
 const credentials = require('../common/credentials');
-const misc = require('../common/misc');
+const misc = require('../common/misc'); // CORS origins
 
 const DB_config = {
   DB_URL: "mongodb://localhost:27017/",
@@ -124,7 +125,13 @@ app.post('/bank_account_transactions', (req, res) => {
   });
 });
 
-// Route to register transactions
+app.post('/transactions', (req,res) => {
+  res.send('Not implemented yet')
+})
+
+app.post('/register_transactions', (req,res) => {
+  res.send('Not implemented yet')
+})
 
 
 
