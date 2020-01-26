@@ -12,6 +12,9 @@ const mongoose = require("mongoose");
 // personal modules
 const authorization_middleware = require('@moreillon/authorization_middleware');
 
+// Mongoose models
+const Transaction = require('./models/transaction');
+
 // local modules
 const credentials = require('../common/credentials');
 const misc = require('../common/misc'); // CORS origins
@@ -27,6 +30,13 @@ const DB_config = {
     useUnifiedTopology: true,
   },
 }
+
+mongoose.connect('mongodb://localhost:27017/finances', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+});
+
 
 const port = 8086;
 
@@ -126,11 +136,35 @@ app.post('/bank_account_transactions', (req, res) => {
 });
 
 app.post('/transactions', (req,res) => {
-  res.send('Not implemented yet')
+  Transaction.find({account: req.body.account}, (err, docs) => {
+    if (err) return res.status(500);
+    return res.send(docs)
+  })
 })
 
 app.post('/register_transactions', (req,res) => {
-  res.send('Not implemented yet')
+
+  let bulk_operations = []
+  for (var transaction of req.body.transactions) {
+    bulk_operations.push({
+      updateOne: {
+        filter: transaction,
+        update: transaction,
+        upsert: true
+      }
+    })
+  }
+
+  Transaction.bulkWrite(bulk_operations)
+  .then( bulkWriteOpResult => {
+    console.log('BULK update OK');
+    res.send('OK')
+  })
+  .catch( err => {
+    console.log(err);
+    res.status(500)
+  });
+
 })
 
 
