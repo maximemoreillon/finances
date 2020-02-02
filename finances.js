@@ -14,6 +14,7 @@ const authorization_middleware = require('@moreillon/authorization_middleware');
 
 // Mongoose models
 const Transaction = require('./models/transaction');
+const BalanceEntry = require('./models/balanceEntry');
 
 // local modules
 const credentials = require('../common/credentials');
@@ -107,40 +108,31 @@ app.post('/get_balance_history',  (req, res) => {
   });
 });
 
-app.post('/credit_card_transactions', (req, res) => {
-  MongoClient.connect(DB_config.DB_URL, DB_config.constructor_options, (err, db) => {
-    if (err) throw err;
-    db.db(DB_config.DB_name)
-    .collection(DB_config.credit_card_transactions_collection_name)
-    .find({}).sort({date: -1})
-    .toArray((err, result) => {
-      if (err) throw err;
-      db.close();
-      res.send(result);
-    });
-  });
-});
+app.post('/register_balance_entries', (req,res) => {
 
-app.post('/bank_account_transactions', (req, res) => {
-  MongoClient.connect(DB_config.DB_URL, DB_config.constructor_options, (err, db) => {
-    if (err) throw err;
-    db.db(DB_config.DB_name)
-    .collection(DB_config.bank_account_transactions_collection_name)
-    .find({}).sort({ date: -1 })
-    .toArray((err, result) => {
-      if (err) throw err;
-      db.close();
-      res.send(result);
-    });
-  });
-});
+  let bulk_operations = []
+  for (var balance_entry of req.body.balance_entries) {
+    bulk_operations.push({
+      updateOne: {
+        filter: balance_entry,
+        update: balance_entry,
+        upsert: true
+      }
+    })
+  }
 
-app.post('/transactions', (req,res) => {
-  Transaction.find({account: req.body.account}, (err, docs) => {
-    if (err) return res.status(500);
-    return res.send(docs)
+  Transaction.bulkWrite(bulk_operations)
+  .then( bulkWriteOpResult => {
+    console.log('BULK update OK');
+    res.send('OK')
   })
+  .catch( err => {
+    console.log(err);
+    res.status(500)
+  });
+
 })
+
 
 app.post('/register_transactions', (req,res) => {
 
@@ -165,6 +157,20 @@ app.post('/register_transactions', (req,res) => {
     res.status(500)
   });
 
+})
+
+app.post('/mark_as_business_expense', (req,res) => {
+  Transaction.findByIdAndUpdate(req.body._id, {$set: {business_expense: true}}, (err, docs) => {
+    if (err) return res.status(500);
+    return res.send(docs)
+  })
+})
+
+app.post('/mark_as_private_expense', (req,res) => {
+  Transaction.findByIdAndUpdate(req.body._id, {$set: {business_expense: false}}, (err, docs) => {
+    if (err) return res.status(500);
+    return res.send(docs)
+  })
 })
 
 
