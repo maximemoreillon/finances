@@ -6,6 +6,6 @@ var BalanceEntrySchema = new mongoose.Schema({
   account: String,
 });
 
-var BalanceEntry= mongoose.model('Transaction', BalanceEntrySchema);
+var BalanceEntry= mongoose.model('BalanceEntry', BalanceEntrySchema);
 
 module.exports = BalanceEntry

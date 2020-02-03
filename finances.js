@@ -108,6 +108,15 @@ app.post('/get_balance_history',  (req, res) => {
   });
 });
 
+app.post('/register_balance_entry', (req,res) => {
+
+  const balance_entry = new BalanceEntry(req.body.balance_entry);
+  balance_entry.save()
+  .then(() => res.send("OK"))
+  .catch(error => console.log(error))
+
+})
+
 app.post('/register_balance_entries', (req,res) => {
 
   let bulk_operations = []
@@ -121,7 +130,7 @@ app.post('/register_balance_entries', (req,res) => {
     })
   }
 
-  Transaction.bulkWrite(bulk_operations)
+  BalanceEntry.bulkWrite(bulk_operations)
   .then( bulkWriteOpResult => {
     console.log('BULK update OK');
     res.send('OK')
@@ -133,6 +142,14 @@ app.post('/register_balance_entries', (req,res) => {
 
 })
 
+
+app.post('/transactions', (req,res) => {
+  // Route to get all transactions
+  Transaction.find({account: req.body.account}, (err, docs) => {
+    if (err) return res.status(500);
+    res.send(docs)
+  })
+});
 
 app.post('/register_transactions', (req,res) => {
 
