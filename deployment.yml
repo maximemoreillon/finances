@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: finances-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: finances-deployment
+  template:
+    metadata:
+      labels:
+        app: finances-deployment
+    spec:
+      containers:
+      - name: finances
+        image: moreillon/finances
+        ports:
+        - containerPort: 8086
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: finances-service
+  name: finances-service
+spec:
+  ports:
+  - port: 8086
+    nodePort: 30086
+  selector:
+    app: finances-deployment
+  type: LoadBalancer

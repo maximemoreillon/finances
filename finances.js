@@ -17,22 +17,19 @@ const Transaction = require('./models/transaction');
 const BalanceEntry = require('./models/balanceEntry');
 
 // local modules
-const credentials = require('../common/credentials');
-const misc = require('../common/misc'); // CORS origins
+const secrets = require('./secrets');
 
 const DB_config = {
-  DB_URL: "mongodb://localhost:27017/",
-  DB_name: "finances",
-  balance_collection_name: "resona_balance",
-  bank_account_transactions_collection_name: "bank_account_transactions",
-  credit_card_transactions_collection_name: "credit_card_transactions",
+  DB_URL: secrets.mongodb_url,
+  DB_name: secrets.db_name,
+  balance_collection_name: secrets.balance_collection_name,
   constructor_options: {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   },
 }
 
-mongoose.connect('mongodb://localhost:27017/finances', {
+mongoose.connect(secrets.mongodb_url + 'finances', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
@@ -45,7 +42,7 @@ const port = 8086;
 process.env.TZ = 'Asia/Tokyo';
 
 // configure the authorization middleware
-authorization_middleware.secret = credentials.jwt.secret
+authorization_middleware.secret = secrets.jwt_secret
 
 
 // Instanciate objects
@@ -58,23 +55,8 @@ var http_server = http.Server(app);
 app.use(bodyParser.json());
 app.use(history());
 app.use(express.static(path.join(__dirname, 'dist')));
-app.use(cors({
-  //origin: misc.cors_origins,
+app.use(cors());
 
-  // Hack to allow all origins
-  origin: (origin, callback) => {
-    callback(null, true)
-  },
-
-  credentials: true,
-}));
-app.use(cookieSession({
-  name: 'session',
-  secret: credentials.session.secret,
-  maxAge: 253402300000000,
-  sameSite: false,
-  domain: '.maximemoreillon.com'
-}));
 
 
 app.use(authorization_middleware.middleware);

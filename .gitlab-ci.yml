@@ -1,0 +1,25 @@
+stages:
+  - containerization
+  - deploy
+
+variables:
+  DOCKER_IMAGE: moreillon/finances
+  KUBERNETES_DEPLOYMENT: finances-deployment
+
+
+containerization:
+  stage: containerization
+  script:
+    - cp ${SECRETS} ./secrets.js
+    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DOCKER_IMAGE} .
+    - docker push ${DOCKER_IMAGE}
+    - docker image rm ${DOCKER_IMAGE}
+
+deployment:
+  stage: deploy
+  script:
+    - kubectl apply -f deployment.yml
+    - kubectl rollout restart deployment/${KUBERNETES_DEPLOYMENT}
+  environment:
+    name: production
