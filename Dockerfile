@@ -3,4 +3,4 @@ WORKDIR /usr/src/app
 COPY . .
 RUN npm install
 EXPOSE 8086
-CMD [ "node", "weight.js" ]
+CMD [ "node", "finances.js" ]
