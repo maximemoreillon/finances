@@ -81,15 +81,16 @@ var MongoClient = mongodb.MongoClient;
 var app = express();
 
 // Express configuration
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'dist')));
-app.use(cors());
 app.use(history({
   // Ignore routes for connect-history-api-fallback
   rewrites: [
     { from: '/balance_history_influx', to: '/balance_history_influx'},
   ]
 }));
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'dist')));
+app.use(cors());
+
 
 
 app.use(authorization_middleware.middleware);
