@@ -1,27 +1,65 @@
 // NPM modules
-const mongodb = require('mongodb');
-const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const cookieSession = require('cookie-session')
 const cors = require('cors')
 const history = require('connect-history-api-fallback');
 const mongoose = require("mongoose");
+const Influx = require('influx');
+const mongodb = require('mongodb');
 
 // personal modules
 const authorization_middleware = require('@moreillon/authorization_middleware');
 
-// Mongoose models
-const Transaction = require('./models/transaction');
-const BalanceEntry = require('./models/balanceEntry');
-
 // local modules
 const secrets = require('./secrets');
 
+// Mongoose models
+const Transaction = require('./models/transaction');
+
+const port = 7086;
+const DB_name = 'finances'
+
+mongoose.connect(secrets.mongodb_url + DB_name, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+});
+
+
+const influx = new Influx.InfluxDB({
+  host: secrets.influx_url,
+  database: DB_name,
+
+  /*
+  schema: [
+    {
+      measurement: 'balance', // PUT NAME OF ACCOUNT HERE
+      fields: {
+        balance: Influx.FieldType.FLOAT,
+      },
+      tags: ['currency']
+    }
+  ]
+  */
+})
+
+// Create DB if it does not exist
+influx.getDatabaseNames()
+.then(names => {
+  if (!names.includes(DB_name)) {
+    return influx.createDatabase(DB_name);
+  }
+})
+.catch(err => {
+  console.error(`Error creating Influx database!`);
+})
+
+
+// This will be gone soon
 const DB_config = {
   DB_URL: secrets.mongodb_url,
-  DB_name: secrets.db_name,
+  DB_name: DB_name,
   balance_collection_name: secrets.balance_collection_name,
   constructor_options: {
     useNewUrlParser: true,
@@ -29,14 +67,8 @@ const DB_config = {
   },
 }
 
-mongoose.connect(secrets.mongodb_url + 'finances', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify: false,
-});
 
 
-const port = 8086;
 
 // Set timezone
 process.env.TZ = 'Asia/Tokyo';
@@ -49,14 +81,17 @@ authorization_middleware.secret = secrets.jwt_secret
 var ObjectID = mongodb.ObjectID;
 var MongoClient = mongodb.MongoClient;
 var app = express();
-var http_server = http.Server(app);
 
 // Express configuration
 app.use(bodyParser.json());
-app.use(history());
 app.use(express.static(path.join(__dirname, 'dist')));
 app.use(cors());
-
+app.use(history({
+  // Ignore routes for connect-history-api-fallback
+  rewrites: [
+    { from: '/balance_history_influx', to: '/balance_history_influx'},
+  ]
+}));
 
 
 app.use(authorization_middleware.middleware);
@@ -90,38 +125,58 @@ app.post('/get_balance_history',  (req, res) => {
   });
 });
 
-app.post('/register_balance_entry', (req,res) => {
+app.post('/register_current_balance', (req,res) => {
 
-  const balance_entry = new BalanceEntry(req.body.balance_entry);
-  balance_entry.save()
-  .then(() => res.send("OK"))
-  .catch(error => console.log(error))
+  influx.writePoints(
+    [
+      {
+        measurement: req.body.account,
+        tags: {
+          currency: req.body.currency,
+        },
+        fields: {
+          balance: req.body.balance
+        },
+        timestamp: new Date(),
+      }
+    ], {
+      database: DB_name,
+      precision: 's',
+    })
+    .then( () => res.send("OK"))
+    .catch(error => res.status(500).send(`Error saving data to InfluxDB! ${error}`));
 
 })
 
-app.post('/register_balance_entries', (req,res) => {
+app.post('/register_multiple_balance_entries', (req,res) => {
 
-  let bulk_operations = []
-  for (var balance_entry of req.body.balance_entries) {
-    bulk_operations.push({
-      updateOne: {
-        filter: balance_entry,
-        update: balance_entry,
-        upsert: true
-      }
+  let points = []
+  req.body.forEach(entry => {
+    points.push({
+      measurement: entry.account,
+      tags: {
+        currency: entry.currency,
+      },
+      fields: {
+        balance: entry.balance
+      },
+      timestamp: new Date(),
     })
-  }
-
-  BalanceEntry.bulkWrite(bulk_operations)
-  .then( bulkWriteOpResult => {
-    console.log('BULK update OK');
-    res.send('OK')
   })
-  .catch( err => {
-    console.log(err);
-    res.status(500)
-  });
 
+  influx.writePoints(points, {
+      database: DB_name,
+      precision: 's',
+    })
+    .then( () => res.send("OK"))
+    .catch(error => res.status(500).send(`Error saving data to InfluxDB! ${error}`));
+})
+
+
+app.get('/balance_history_influx', (req,res) => {
+  influx.query(`select * from ${req.body.account}`)
+  .then( result => res.send(result) )
+  .catch( error => res.status(500) );
 })
 
 
@@ -175,6 +230,6 @@ app.post('/mark_as_private_expense', (req,res) => {
 
 
 // Start server
-http_server.listen(port, () => {
+app.listen(port, () => {
   console.log(`Finances manager listening on *:${port}`);
 });
