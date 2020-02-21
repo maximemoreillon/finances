@@ -68,8 +68,6 @@ const DB_config = {
 }
 
 
-
-
 // Set timezone
 process.env.TZ = 'Asia/Tokyo';
 
