@@ -175,20 +175,36 @@ app.post('/register_multiple_balance_entries', (req,res) => {
 app.get('/balance_history_influx', (req,res) => {
   influx.query(`select * from ${req.body.account}`)
   .then( result => res.send(result) )
-  .catch( error => res.status(500) );
+  .catch( error => res.status(500).send("Error getting balance from Influx") );
 })
 
 
 app.post('/transactions', (req,res) => {
   // Route to get all transactions
   Transaction.find({account: req.body.account}, (err, docs) => {
-    if (err) return res.status(500);
+    if (err) return res.status(500).send("Error retrieving transactions from DB")
     res.send(docs)
   })
 });
 
-app.post('/register_transactions', (req,res) => {
+app.post('/get_transaction', (req,res) => {
+  // Route to get all transactions
+  Transaction.findById(req.body._id, (err, transaction) => {
+    if(err) return res.status(500).send("Transaction not found")
+    res.send(transaction)
+  });
+});
 
+app.post('/update_transaction', (req,res) => {
+  // Route to get all transactions
+  Transaction.findByIdAndUpdate(req.body._id, req.body, {new: true}, (err, transaction) => {
+    if(err) return res.status(500).send("Error updating transaction")
+    res.send(transaction)
+  });
+});
+
+app.post('/register_transactions', (req,res) => {
+  // Route to register multiple transactions
   let bulk_operations = []
   for (var transaction of req.body.transactions) {
     bulk_operations.push({
@@ -201,16 +217,11 @@ app.post('/register_transactions', (req,res) => {
   }
 
   Transaction.bulkWrite(bulk_operations)
-  .then( bulkWriteOpResult => {
-    console.log('BULK update OK');
-    res.send('OK')
-  })
-  .catch( err => {
-    console.log(err);
-    res.status(500)
-  });
+  .then( bulkWriteOpResult => res.send('OK'))
+  .catch( err => res.status(500).send("Error writing to DB"))
 
 })
+
 
 app.post('/mark_as_business_expense', (req,res) => {
   Transaction.findByIdAndUpdate(req.body._id, {$set: {business_expense: true}}, (err, docs) => {
@@ -225,6 +236,7 @@ app.post('/mark_as_private_expense', (req,res) => {
     return res.send(docs)
   })
 })
+
 
 
 
