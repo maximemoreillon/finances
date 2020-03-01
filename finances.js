@@ -90,7 +90,7 @@ app.post('/balance_history_influx', (req,res) => {
 
 app.post('/get_current_balance', (req,res) => {
   influx.query(`select * from ${req.body.account} GROUP BY * ORDER BY DESC LIMIT 1`)
-  .then( result => res.send(result) )
+  .then( result => res.send(result[0].balance) )
   .catch( error => res.status(500).send(`Error getting balance from Influx: ${error}`) );
 })
 
