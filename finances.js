@@ -6,7 +6,6 @@ const cors = require('cors')
 const history = require('connect-history-api-fallback')
 const mongoose = require("mongoose")
 const Influx = require('influx')
-const mongodb = require('mongodb')
 
 // personal modules
 const authorization_middleware = require('@moreillon/authorization_middleware')
@@ -30,18 +29,6 @@ mongoose.connect(secrets.mongodb_url + DB_name, {
 const influx = new Influx.InfluxDB({
   host: secrets.influx_url,
   database: DB_name,
-
-  /*
-  schema: [
-    {
-      measurement: 'balance', // PUT NAME OF ACCOUNT HERE
-      fields: {
-        balance: Influx.FieldType.FLOAT,
-      },
-      tags: ['currency']
-    }
-  ]
-  */
 })
 
 // Create DB if it does not exist
@@ -56,18 +43,6 @@ influx.getDatabaseNames()
 })
 
 
-// This will be gone soon
-const DB_config = {
-  DB_URL: secrets.mongodb_url,
-  DB_name: DB_name,
-  balance_collection_name: secrets.balance_collection_name,
-  constructor_options: {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  },
-}
-
-
 // Set timezone
 process.env.TZ = 'Asia/Tokyo';
 
@@ -75,56 +50,16 @@ process.env.TZ = 'Asia/Tokyo';
 authorization_middleware.secret = secrets.jwt_secret
 
 
-// Instanciate objects
-var ObjectID = mongodb.ObjectID;
-var MongoClient = mongodb.MongoClient;
 var app = express();
 
 // Express configuration
-app.use(history({
-  // Ignore routes for connect-history-api-fallback
-  rewrites: [
-    { from: '/balance_history_influx', to: '/balance_history_influx'},
-  ]
-}));
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'dist')));
-app.use(cors());
+app.use(history())
+app.use(bodyParser.json())
+app.use(express.static(path.join(__dirname, 'dist')))
+app.use(cors())
+app.use(authorization_middleware.middleware)
 
-
-
-app.use(authorization_middleware.middleware);
-
-// Express routes
-app.post('/get_current_balance', (req, res) => {
-  MongoClient.connect(DB_config.DB_URL, DB_config.constructor_options, (err, db) => {
-    if (err) throw err;
-    db.db(DB_config.DB_name)
-    .collection(DB_config.balance_collection_name)
-    .find({}).sort({date: -1}).limit(1)
-    .toArray((err, result) => {
-      if (err) throw err;
-      db.close();
-      res.send(result[0].balance);
-    });
-  });
-});
-
-app.post('/get_balance_history',  (req, res) => {
-  MongoClient.connect(DB_config.DB_URL, DB_config.constructor_options, (err, db) => {
-    if (err) throw err;
-    db.db(DB_config.DB_name)
-    .collection(DB_config.balance_collection_name)
-    .find({}).sort({date: -1})
-    .toArray((err, result) => {
-      if (err) throw err;
-      db.close();
-      res.send(result);
-    });
-  });
-});
-
-app.post('/register_current_balance', (req,res) => {
+app.post('/register_balance', (req,res) => {
 
   influx.writePoints(
     [
@@ -142,38 +77,19 @@ app.post('/register_current_balance', (req,res) => {
       database: DB_name,
       precision: 's',
     })
-    .then( () => res.send("OK"))
+    .then( () => res.send("Balance registered successfully"))
     .catch(error => res.status(500).send(`Error saving data to InfluxDB! ${error}`));
 
 })
-
-app.post('/register_multiple_balance_entries', (req,res) => {
-
-  let points = []
-  req.body.forEach(entry => {
-    points.push({
-      measurement: entry.account,
-      tags: {
-        currency: entry.currency,
-      },
-      fields: {
-        balance: entry.balance
-      },
-      timestamp: new Date(),
-    })
-  })
-
-  influx.writePoints(points, {
-      database: DB_name,
-      precision: 's',
-    })
-    .then( () => res.send("OK"))
-    .catch(error => res.status(500).send(`Error saving data to InfluxDB! ${error}`));
-})
-
 
 app.post('/balance_history_influx', (req,res) => {
   influx.query(`select * from ${req.body.account}`)
+  .then( result => res.send(result) )
+  .catch( error => res.status(500).send(`Error getting balance from Influx: ${error}`) );
+})
+
+app.post('/get_current_balance', (req,res) => {
+  influx.query(`select * from ${req.body.account} GROUP BY * ORDER BY DESC LIMIT 1`)
   .then( result => res.send(result) )
   .catch( error => res.status(500).send(`Error getting balance from Influx: ${error}`) );
 })
