@@ -1,21 +1,21 @@
 // NPM modules
-const express = require('express');
-const bodyParser = require('body-parser');
-const path = require('path');
+const express = require('express')
+const bodyParser = require('body-parser')
+const path = require('path')
 const cors = require('cors')
-const history = require('connect-history-api-fallback');
-const mongoose = require("mongoose");
-const Influx = require('influx');
-const mongodb = require('mongodb');
+const history = require('connect-history-api-fallback')
+const mongoose = require("mongoose")
+const Influx = require('influx')
+const mongodb = require('mongodb')
 
 // personal modules
-const authorization_middleware = require('@moreillon/authorization_middleware');
+const authorization_middleware = require('@moreillon/authorization_middleware')
 
 // local modules
-const secrets = require('./secrets');
+const secrets = require('./secrets')
 
 // Mongoose models
-const Transaction = require('./models/transaction');
+const Transaction = require('./models/transaction')
 
 const port = 7086;
 const DB_name = 'finances'
