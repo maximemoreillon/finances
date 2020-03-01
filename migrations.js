@@ -23,7 +23,7 @@ jwt.sign({ app: 'finances' }, secrets.jwt_secret, (err, token) => {
 
 
 
-    axios.post('https://finances.maximemoreillon.com/register_multiple_balance_entries',
+    axios.post('http://192.168.1.2:7086/register_multiple_balance_entries',
     response.data,
     {
       headers: {

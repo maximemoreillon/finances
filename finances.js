@@ -172,10 +172,10 @@ app.post('/register_multiple_balance_entries', (req,res) => {
 })
 
 
-app.get('/balance_history_influx', (req,res) => {
+app.post('/balance_history_influx', (req,res) => {
   influx.query(`select * from ${req.body.account}`)
   .then( result => res.send(result) )
-  .catch( error => res.status(500).send("Error getting balance from Influx") );
+  .catch( error => res.status(500).send(`Error getting balance from Influx: ${error}`) );
 })
 
 
