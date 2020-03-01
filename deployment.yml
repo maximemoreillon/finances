@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: finances
-        image: moreillon/finances
+        image: 192.168.1.2:5000/finances
         ports:
         - containerPort: 7086
 ---
