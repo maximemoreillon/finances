@@ -4,7 +4,7 @@ stages:
 
 variables:
   DOCKER_IMAGE: 192.168.1.2:5000/finances
-  KUBERNETES_DEPLOYMENT: finances-deployment
+  KUBERNETES_DEPLOYMENT: finances
 
 
 containerization:

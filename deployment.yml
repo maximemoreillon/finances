@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: finances-deployment
+  name: finances
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: finances-deployment
+      app: finances
   template:
     metadata:
       labels:
-        app: finances-deployment
+        app: finances
     spec:
       containers:
       - name: finances
@@ -22,12 +22,12 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    run: finances-service
-  name: finances-service
+    run: finances
+  name: finances
 spec:
   ports:
   - port: 7086
     nodePort: 30086
   selector:
-    app: finances-deployment
+    app: finances
   type: LoadBalancer
