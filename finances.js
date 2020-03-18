@@ -39,7 +39,7 @@ influx.getDatabaseNames()
   }
 })
 .catch(err => {
-  console.error(`Error creating Influx database!`);
+  console.error(`Error creating Influx database! ${err}`);
 })
 
 
@@ -116,6 +116,14 @@ app.post('/update_transaction', (req,res) => {
   Transaction.findByIdAndUpdate(req.body._id, req.body, {new: true}, (err, transaction) => {
     if(err) return res.status(500).send("Error updating transaction")
     res.send(transaction)
+  });
+});
+
+app.post('/delete_transaction', (req,res) => {
+  // Route to get all transactions
+  Transaction.findByIdAndDelete(req.body._id, req.body, {new: true}, (err, transaction) => {
+    if(err) return res.status(500).send("Error deleting transaction")
+    res.send('OK')
   });
 });
 
