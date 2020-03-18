@@ -82,7 +82,7 @@ app.post('/register_balance', (req,res) => {
 
 })
 
-app.post('/balance_history_influx', (req,res) => {
+app.post('/balance_history', (req,res) => {
   influx.query(`select * from ${req.body.account}`)
   .then( result => res.send(result) )
   .catch( error => res.status(500).send(`Error getting balance from Influx: ${error}`) );
@@ -112,7 +112,7 @@ app.post('/get_transaction', (req,res) => {
 });
 
 app.post('/update_transaction', (req,res) => {
-  // Route to get all transactions
+  // Route to update a transaction
   Transaction.findByIdAndUpdate(req.body._id, req.body, {new: true}, (err, transaction) => {
     if(err) return res.status(500).send("Error updating transaction")
     res.send(transaction)
@@ -120,8 +120,8 @@ app.post('/update_transaction', (req,res) => {
 });
 
 app.post('/delete_transaction', (req,res) => {
-  // Route to get all transactions
-  Transaction.findByIdAndDelete(req.body._id, req.body, {new: true}, (err, transaction) => {
+  // Route to delete a transaction
+  Transaction.findByIdAndDelete(req.body._id, (err, transaction) => {
     if(err) return res.status(500).send("Error deleting transaction")
     res.send('OK')
   });
