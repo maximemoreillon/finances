@@ -42,7 +42,6 @@ influx.getDatabaseNames()
   console.error(`Error creating Influx database! ${err}`);
 })
 
-
 // Set timezone
 process.env.TZ = 'Asia/Tokyo';
 
