@@ -47,7 +47,7 @@ influx.getDatabaseNames()
 process.env.TZ = 'Asia/Tokyo';
 
 // configure the authorization middleware
-authorization_middleware.secret = secrets.jwt_secret
+authorization_middleware.authentication_api_url = secrets.authentication_api_url
 
 
 var app = express();
