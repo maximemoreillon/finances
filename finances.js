@@ -1,9 +1,7 @@
 // NPM modules
 const express = require('express')
 const bodyParser = require('body-parser')
-const path = require('path')
 const cors = require('cors')
-const history = require('connect-history-api-fallback')
 const mongoose = require("mongoose")
 const Influx = require('influx')
 
@@ -52,9 +50,7 @@ authorization_middleware.authentication_api_url = secrets.authentication_api_url
 var app = express();
 
 // Express configuration
-app.use(history())
 app.use(bodyParser.json())
-app.use(express.static(path.join(__dirname, 'dist')))
 app.use(cors())
 app.use(authorization_middleware.middleware)
 
