@@ -12,7 +12,7 @@ variables:
 containerization:
   stage: containerization
   script:
-    - cp ${ENV} ./.env
+    #- cp ${ENV} ./.env
     - cp ${SECRETS} ./secrets.js
     - docker build -t ${DOCKER_IMAGE} .
     - docker push ${DOCKER_IMAGE}
@@ -26,3 +26,5 @@ deployment:
     - kubectl rollout restart deployment/${APPLICATION_NAME}
   environment:
     name: production
+    kubernetes:
+      namespace: ${KUBERNETES_NAMESPACE}
