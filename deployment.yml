@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: finances
-        image: 192.168.1.2:5000/finances
+        image: ${CONTAINER_REGISTRY}/${APPLICATION_NAME}
         ports:
         - containerPort: 7086
 ---
@@ -30,4 +30,4 @@ spec:
     nodePort: 30086
   selector:
     app: finances
-  type: LoadBalancer
+  type: NodePort

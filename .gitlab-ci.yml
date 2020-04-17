@@ -3,13 +3,16 @@ stages:
   - deploy
 
 variables:
-  DOCKER_IMAGE: 192.168.1.2:5000/finances
-  KUBERNETES_DEPLOYMENT: finances
+  KUBERNETES_NAMESPACE: moreillon
+  CONTAINER_REGISTRY: 192.168.1.2:5000
+  APPLICATION_NAME: finances
+  DOCKER_IMAGE: ${CONTAINER_REGISTRY}/${APPLICATION_NAME}
 
 
 containerization:
   stage: containerization
   script:
+    - cp ${ENV} ./.env
     - cp ${SECRETS} ./secrets.js
     - docker build -t ${DOCKER_IMAGE} .
     - docker push ${DOCKER_IMAGE}
@@ -18,7 +21,8 @@ containerization:
 deployment:
   stage: deploy
   script:
+    - envsubst < deployment.yml | kubectl apply -f -
     - kubectl apply -f deployment.yml
-    - kubectl rollout restart deployment/${KUBERNETES_DEPLOYMENT}
+    - kubectl rollout restart deployment/${APPLICATION_NAME}
   environment:
     name: production
