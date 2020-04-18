@@ -22,7 +22,6 @@ deployment:
   stage: deploy
   script:
     - envsubst < deployment.yml | kubectl apply -f -
-    - kubectl apply -f deployment.yml
     - kubectl rollout restart deployment/${APPLICATION_NAME}
   environment:
     name: production
