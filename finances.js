@@ -170,5 +170,5 @@ app.post('/mark_as_private_expense', (req,res) => {
 
 // Start server
 app.listen(port, () => {
-  console.log(`Finances manager listening on *:${port}`);
+  console.log(`Finances API listening on *:${port}`);
 });
