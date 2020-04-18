@@ -6,6 +6,8 @@ const mongoose = require("mongoose")
 const Influx = require('influx')
 const dotenv = require('dotenv');
 
+
+const axios = require('axios')
 // personal modules
 const authentication_middleware = require('@moreillon/authentication_middleware')
 
@@ -60,6 +62,14 @@ app.use(authentication_middleware.middleware)
 
 app.get('/', (req,res) => {
   res.send(`Finances API, Maxime MOREILLON`)
+})
+
+app.get('/auth', (req,res) => {
+  axios.post(`https://authentication`)
+  .then(response => {
+    res.send(response.data)
+  })
+  .catch(error => { res.send(error) })
 })
 
 app.post('/register_balance', (req,res) => {
