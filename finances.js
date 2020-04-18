@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const mongoose = require("mongoose")
 const Influx = require('influx')
+const dotenv = require('dotenv');
 
 // personal modules
 const authorization_middleware = require('@moreillon/authorization_middleware')
@@ -11,10 +12,14 @@ const authorization_middleware = require('@moreillon/authorization_middleware')
 // local modules
 const secrets = require('./secrets')
 
+dotenv.config();
+
 // Mongoose models
 const Transaction = require('./models/transaction')
 
-const port = 7086;
+var port = 80
+if(process.env.APP_PORT) port=process.env.APP_PORT
+
 const DB_name = 'finances'
 
 mongoose.connect(secrets.mongodb_url + DB_name, {
