@@ -59,6 +59,10 @@ app.use(bodyParser.json())
 app.use(cors())
 app.use(authorization_middleware.middleware)
 
+app.get('/', (req,res) => {
+  res.send(`Finances API, Maxime MOREILLON`)
+})
+
 app.post('/register_balance', (req,res) => {
 
   influx.writePoints(
