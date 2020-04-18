@@ -7,7 +7,7 @@ const Influx = require('influx')
 const dotenv = require('dotenv');
 
 // personal modules
-const authorization_middleware = require('@moreillon/authorization_middleware')
+const authentication_middleware = require('@moreillon/authentication_middleware')
 
 // local modules
 const secrets = require('./secrets')
@@ -49,7 +49,7 @@ influx.getDatabaseNames()
 process.env.TZ = 'Asia/Tokyo';
 
 // configure the authorization middleware
-authorization_middleware.authentication_api_url = `${secrets.authentication_api_url}/decode_jwt`
+authentication_middleware.authentication_api_url = `${secrets.authentication_api_url}/decode_jwt`
 
 
 var app = express();
@@ -57,7 +57,7 @@ var app = express();
 // Express configuration
 app.use(bodyParser.json())
 app.use(cors())
-app.use(authorization_middleware.middleware)
+app.use(authentication_middleware.middleware)
 
 app.get('/', (req,res) => {
   res.send(`Finances API, Maxime MOREILLON`)

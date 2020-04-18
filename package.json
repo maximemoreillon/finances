@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@moreillon/authentication_middleware": "^1.0.1",
     "@moreillon/authorization_middleware": "^0.3.0",
     "axios": "^0.19.2",
     "connect-history-api-fallback": "^1.6.0",
@@ -17,12 +18,12 @@
     "csv-parse": "^4.8.8",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "express-session": "^1.17.0",
+    "express-session": "^1.17.1",
     "influx": "^5.5.1",
     "jsonwebtoken": "^8.5.1",
-    "mongodb": "^3.5.5",
-    "mongoose": "^5.9.6",
+    "mongodb": "^3.5.6",
+    "mongoose": "^5.9.9",
     "node-schedule": "^1.3.2",
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.3"
   }
 }
