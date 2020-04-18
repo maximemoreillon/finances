@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: finances
+  name: ${APPLICATION_NAME}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: finances
+      app: ${APPLICATION_NAME}
   template:
     metadata:
       labels:
-        app: finances
+        app: ${APPLICATION_NAME}
     spec:
       containers:
-      - name: finances
+      - name: ${APPLICATION_NAME}
         image: ${CONTAINER_REGISTRY}/${APPLICATION_NAME}:latest
         imagePullPolicy: Always # Ensures that k8s pulls a new image on restart
         ports:
@@ -22,11 +22,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: finances
+  name: ${APPLICATION_NAME}
 spec:
   type: NodePort
   ports:
   - port: 80
-    nodePort: 30086
+    nodePort: ${SERVICE_PORT}
   selector:
-    app: finances
+    app: ${APPLICATION_NAME}
