@@ -51,7 +51,6 @@ process.env.TZ = 'Asia/Tokyo';
 // configure the authorization middleware
 authentication_middleware.authentication_api_url = `${secrets.authentication_api_url}/decode_jwt`
 
-
 var app = express();
 
 // Express configuration
