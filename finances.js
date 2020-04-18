@@ -64,14 +64,6 @@ app.get('/', (req,res) => {
   res.send(`Finances API, Maxime MOREILLON`)
 })
 
-app.get('/auth', (req,res) => {
-  axios.post(`https://authentication`)
-  .then(response => {
-    res.send(response.data)
-  })
-  .catch(error => { res.send(error) })
-})
-
 app.post('/register_balance', (req,res) => {
 
   influx.writePoints(
