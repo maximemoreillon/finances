@@ -113,8 +113,12 @@ app.post('/get_current_balance', (req,res) => {
 
 // TRANSACTIONS RELATED ROUTES
 app.get('/transactions', (req,res) => {
-  // Route to get all transactions of a given account
-  Transaction.find({account: req.query.account}).sort({date: -1}).exec((err, docs) => {
+  // Route to get all transactions
+
+  let query = {}
+  if('account' in req.query) query.account = req.query.account
+
+  Transaction.find(query).sort({date: -1}).exec((err, docs) => {
     if (err) return res.status(500).send("Error retrieving transactions from DB")
     res.send(docs)
   })
