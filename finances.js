@@ -86,7 +86,7 @@ app.post('/register_balance', (req,res) => {
 
 
 app.get('/balance_history', (req,res) => {
-  influx.query(`select * from ${req.body.account}`)
+  influx.query(`select * from ${req.query.account}`)
   .then( result => res.send(result) )
   .catch( error => res.status(500).send(`Error getting balance from Influx: ${error}`) );
 })
