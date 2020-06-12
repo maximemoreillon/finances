@@ -84,6 +84,20 @@ app.post('/register_balance', (req,res) => {
 
 })
 
+
+app.get('/balance_history', (req,res) => {
+  influx.query(`select * from ${req.body.account}`)
+  .then( result => res.send(result) )
+  .catch( error => res.status(500).send(`Error getting balance from Influx: ${error}`) );
+})
+
+app.get('/current_balance', (req,res) => {
+  influx.query(`select * from ${req.query.account} GROUP BY * ORDER BY DESC LIMIT 1`)
+  .then( result => res.send(result[0].balance) )
+  .catch( error => res.status(500).send(`Error getting balance from Influx: ${error}`) );
+})
+
+// Legacy routes
 app.post('/balance_history', (req,res) => {
   influx.query(`select * from ${req.body.account}`)
   .then( result => res.send(result) )
@@ -97,33 +111,34 @@ app.post('/get_current_balance', (req,res) => {
 })
 
 
-app.post('/transactions', (req,res) => {
+// TRANSACTIONS RELATED ROUTES
+app.get('/transactions', (req,res) => {
   // Route to get all transactions of a given account
-  Transaction.find({account: req.body.account}).sort({date: -1}).exec((err, docs) => {
+  Transaction.find({account: req.query.account}).sort({date: -1}).exec((err, docs) => {
     if (err) return res.status(500).send("Error retrieving transactions from DB")
     res.send(docs)
   })
-});
+})
 
-app.post('/get_transaction', (req,res) => {
-  // Route to get all transactions
-  Transaction.findById(req.body._id, (err, transaction) => {
+app.get('/transaction', (req,res) => {
+  // Route to get a single transaction
+  Transaction.findById(req.query._id, (err, transaction) => {
     if(err) return res.status(500).send("Transaction not found")
     res.send(transaction)
-  });
-});
+  })
+})
 
-app.post('/update_transaction', (req,res) => {
+app.put('/transaction', (req,res) => {
   // Route to update a transaction
   Transaction.findByIdAndUpdate(req.body._id, req.body, {new: true}, (err, transaction) => {
     if(err) return res.status(500).send("Error updating transaction")
     res.send(transaction)
-  });
-});
+  })
+})
 
-app.post('/delete_transaction', (req,res) => {
+app.delete('/transaction', (req,res) => {
   // Route to delete a transaction
-  Transaction.findByIdAndDelete(req.body._id, (err, transaction) => {
+  Transaction.findByIdAndDelete(req.query._id, (err, transaction) => {
     if(err) return res.status(500).send("Error deleting transaction")
     res.send('OK')
   });
@@ -147,6 +162,41 @@ app.post('/register_transactions', (req,res) => {
   .catch( err => res.status(500).send("Error writing to DB"))
 
 })
+
+// Legacy (NOn-restful) routes
+app.post('/transactions', (req,res) => {
+  // Route to get all transactions of a given account
+  Transaction.find({account: req.body.account}).sort({date: -1}).exec((err, docs) => {
+    if (err) return res.status(500).send("Error retrieving transactions from DB")
+    res.send(docs)
+  })
+});
+
+app.post('/get_transaction', (req,res) => {
+  // Route to get a single transaction
+  Transaction.findById(req.body._id, (err, transaction) => {
+    if(err) return res.status(500).send("Transaction not found")
+    res.send(transaction)
+  });
+});
+
+app.post('/update_transaction', (req,res) => {
+  // Route to update a transaction
+  Transaction.findByIdAndUpdate(req.body._id, req.body, {new: true}, (err, transaction) => {
+    if(err) return res.status(500).send("Error updating transaction")
+    res.send(transaction)
+  });
+});
+
+app.post('/delete_transaction', (req,res) => {
+  // Route to delete a transaction
+  Transaction.findByIdAndDelete(req.body._id, (err, transaction) => {
+    if(err) return res.status(500).send("Error deleting transaction")
+    res.send('OK')
+  });
+});
+
+
 
 
 app.post('/mark_as_business_expense', (req,res) => {
