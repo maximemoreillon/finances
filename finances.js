@@ -11,9 +11,6 @@ const axios = require('axios')
 // personal modules
 const authentication_middleware = require('@moreillon/authentication_middleware')
 
-// local modules
-const secrets = require('./secrets')
-
 dotenv.config();
 
 // Mongoose models
