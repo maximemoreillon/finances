@@ -18,6 +18,8 @@ spec:
         imagePullPolicy: Always # Ensures that k8s pulls a new image on restart
         ports:
         - containerPort: 80
+      imagePullSecrets:
+      - name: registry-credentials # Credentials to pull image from registry
 ---
 apiVersion: v1
 kind: Service

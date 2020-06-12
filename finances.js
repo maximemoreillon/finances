@@ -24,7 +24,7 @@ if(process.env.APP_PORT) port=process.env.APP_PORT
 
 const DB_name = 'finances'
 
-mongoose.connect(secrets.mongodb_url + DB_name, {
+mongoose.connect(`${process.env.MONGODB_URL}/${DB_name}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
@@ -32,7 +32,7 @@ mongoose.connect(secrets.mongodb_url + DB_name, {
 
 
 const influx = new Influx.InfluxDB({
-  host: secrets.influx_url,
+  host: process.env.INFLUXDB_URL,
   database: DB_name,
 })
 
@@ -51,7 +51,7 @@ influx.getDatabaseNames()
 process.env.TZ = 'Asia/Tokyo';
 
 // configure the authorization middleware
-authentication_middleware.authentication_api_url = `${secrets.authentication_api_url}/decode_jwt`
+authentication_middleware.authentication_api_url = `${process.env.AUTHENTICATION_API_URL}/decode_jwt`
 
 var app = express();
 
