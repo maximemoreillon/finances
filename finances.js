@@ -84,18 +84,25 @@ app.post('/register_balance', (req,res) => {
 
 })
 
-
 app.get('/balance_history', (req,res) => {
-  influx.query(`select * from ${req.query.account}`)
+  influx.query(`SELECT * FROM ${req.query.account}`)
   .then( result => res.send(result) )
   .catch( error => res.status(500).send(`Error getting balance from Influx: ${error}`) );
 })
 
 app.get('/current_balance', (req,res) => {
-  influx.query(`select * from ${req.query.account} GROUP BY * ORDER BY DESC LIMIT 1`)
+  influx.query(`SELECT * FROM ${req.query.account} GROUP BY * ORDER BY DESC LIMIT 1`)
   .then( result => res.send(result[0].balance) )
   .catch( error => res.status(500).send(`Error getting balance from Influx: ${error}`) );
 })
+
+app.get('/balance_accounts', (req,res) => {
+  influx.query(`SHOW MEASUREMENTS`)
+  .then( result => res.send(result) )
+  .catch( error => res.status(500).send(`Error getting measurements from Influx: ${error}`) );
+})
+
+
 
 // TRANSACTIONS RELATED ROUTES
 app.get('/transactions', (req,res) => {
@@ -153,6 +160,13 @@ app.post('/register_transactions', (req,res) => {
 
 })
 
+app.get('/transaction_accounts', (req,res) => {
+  // Route to get a single transaction
+  Transaction.find().distinct('account', (err, transaction) => {
+    if(err) return res.status(500).send("Error getting accounts")
+    res.send(transaction)
+  })
+})
 
 
 
