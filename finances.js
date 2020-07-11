@@ -4,14 +4,14 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const mongoose = require("mongoose")
 const Influx = require('influx')
-const dotenv = require('dotenv');
+const dotenv = require('dotenv')
 
 
 const axios = require('axios')
 // personal modules
 const authentication_middleware = require('@moreillon/authentication_middleware')
 
-dotenv.config();
+dotenv.config()
 
 // Mongoose models
 const Transaction = require('./models/transaction')
@@ -61,28 +61,15 @@ app.get('/', (req,res) => {
   res.send(`Finances API, Maxime MOREILLON`)
 })
 
-app.post('/register_balance', (req,res) => {
 
-  influx.writePoints(
-    [
-      {
-        measurement: req.body.account,
-        tags: {
-          currency: req.body.currency,
-        },
-        fields: {
-          balance: req.body.balance
-        },
-        timestamp: new Date(),
-      }
-    ], {
-      database: DB_name,
-      precision: 's',
-    })
-    .then( () => res.send("Balance registered successfully"))
-    .catch(error => res.status(500).send(`Error saving data to InfluxDB! ${error}`));
+const balance_controller = require('./controllers/balance.js')
 
-})
+app.route('/balance')
+  .post(balance_controller.register_balance)
+
+
+// Legacy
+app.post('/register_balance', balance_controller.register_balance)
 
 app.get('/balance_history', (req,res) => {
   influx.query(`SELECT * FROM ${req.query.account}`)
@@ -108,13 +95,20 @@ app.get('/balance_accounts', (req,res) => {
 app.get('/transactions', (req,res) => {
   // Route to get all transactions
 
-  let query = {}
-  if('account' in req.query) query.account = req.query.account
+  let account = req.query.account
+    || req.query.account_name
+    || req.params.account
+    || req.params.account_name
 
-  Transaction.find(query).sort({date: -1}).exec((err, docs) => {
-    if (err) return res.status(500).send("Error retrieving transactions from DB")
-    res.send(docs)
-  })
+  if(!account) return res.status(400).send(`Missing account name`)
+
+  Transaction
+    .find({account: account})
+    .sort({date: -1})
+    .exec((err, docs) => {
+      if (err) return res.status(500).send("Error retrieving transactions from DB")
+      res.send(docs)
+    })
 })
 
 app.get('/transaction', (req,res) => {
