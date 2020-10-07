@@ -21,6 +21,9 @@ exports.register_balance = (req,res) => {
 
   if(!account) return res.status(400).send(`Missing account name`)
 
+  if(!req.body.currency) return res.status(400).send(`Missing currency`)
+  if(!req.body.balance) return res.status(400).send(`Missing balance`)
+
   influx.writePoints(
     [
       {
@@ -33,7 +36,10 @@ exports.register_balance = (req,res) => {
       database: DB_name,
       precision: 's',
     })
-    .then( () => res.send("Balance registered successfully"))
+    .then( () => {
+      res.send("Balance registered successfully")
+      console.log(`Registered balance for account ${account}`)
+    })
     .catch(error => {
       console.log(error)
       res.status(500).send(`Error saving data to InfluxDB! ${error}`)

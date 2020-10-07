@@ -6,8 +6,7 @@ const mongoose = require("mongoose")
 const Influx = require('influx')
 const dotenv = require('dotenv')
 const axios = require('axios')
-// personal modules
-const authentication_middleware = require('@moreillon/authentication_middleware')
+const auth = require('@moreillon/authentication_middleware')
 
 const pjson = require('./package.json')
 
@@ -49,14 +48,14 @@ influx.getDatabaseNames()
 process.env.TZ = 'Asia/Tokyo';
 
 // configure the authorization middleware
-authentication_middleware.authentication_api_url = `${process.env.AUTHENTICATION_API_URL}/decode_jwt`
+auth.authentication_api_url = `${process.env.AUTHENTICATION_API_URL}/decode_jwt`
 
 var app = express()
 
 // Express configuration
 app.use(bodyParser.json())
 app.use(cors())
-app.use(authentication_middleware.middleware)
+app.use(auth.middleware)
 
 app.get('/', (req,res) => {
   res.send({
@@ -69,6 +68,8 @@ app.get('/', (req,res) => {
 
 
 const balance_controller = require('./controllers/balance.js')
+const transaction_controller = require('./controllers/transactions.js')
+const transaction_category_controller = require('./controllers/transaction_categories.js')
 
 app.route('/balance')
   .post(balance_controller.register_balance)
@@ -80,8 +81,7 @@ app.get('/balance_history', balance_controller.get_balance_history)
 app.get('/current_balance', balance_controller.get_current_balance)
 app.get('/balance_accounts', balance_controller.get_accounts)
 
-const transaction_controller = require('./controllers/transactions.js')
-const transaction_category_controller = require('./controllers/transaction_categories.js')
+
 
 // TRANSACTIONS RELATED ROUTES
 app.route('/transactions')
@@ -113,6 +113,4 @@ app.route('/transactions/categories/:category_id')
 
 
 // Start server
-app.listen(port, () => {
-  console.log(`Finances API listening on *:${port}`);
-});
+app.listen(port, () => {console.log(`Finances API listening on *:${port}`)})
