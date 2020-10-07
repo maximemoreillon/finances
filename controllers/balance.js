@@ -25,12 +25,8 @@ exports.register_balance = (req,res) => {
     [
       {
         measurement: account,
-        tags: {
-          currency: req.body.currency,
-        },
-        fields: {
-          balance: req.body.balance
-        },
+        tags: { currency: req.body.currency, },
+        fields: { balance: req.body.balance },
         timestamp: new Date(),
       }
     ], {
@@ -38,5 +34,57 @@ exports.register_balance = (req,res) => {
       precision: 's',
     })
     .then( () => res.send("Balance registered successfully"))
-    .catch(error => res.status(500).send(`Error saving data to InfluxDB! ${error}`));
+    .catch(error => {
+      console.log(error)
+      res.status(500).send(`Error saving data to InfluxDB! ${error}`)
+    })
+}
+
+exports.get_balance_history = (req,res) => {
+
+  let account = req.params.account
+    || req.query.account
+
+  if(!account) return res.status(400).send(`Missing account name`)
+
+  influx.query(`SELECT * FROM ${account}`)
+  .then( (result) => {
+    res.send(result)
+    console.log(`Queried balance history for account ${account}`)
+  })
+  .catch( (error) => {
+    console.log(error)
+    res.status(500).send(`Error getting balance from Influx: ${error}`)
+  })
+}
+
+exports.get_current_balance = (req,res) => {
+
+  let account = req.params.account
+    || req.query.account
+
+  if(!account) return res.status(400).send(`Missing account name`)
+
+  influx.query(`SELECT * FROM ${account} GROUP BY * ORDER BY DESC LIMIT 1`)
+  .then( (result) => {
+    console.log(`Queried current balance for account ${account}`)
+    res.send(result[0].balance)
+  })
+  .catch( (error) => {
+    console.log(error)
+    res.status(500).send(`Error getting balance from Influx: ${error}`)
+  })
+}
+
+exports.get_accounts = (req,res) => {
+
+  influx.query(`SHOW MEASUREMENTS`)
+  .then( (result) => {
+    res.send(result)
+    console.log(`Queries list of accounts for balance`)
+  })
+  .catch( (error) => {
+    res.status(500).send(`Error getting measurements from Influx: ${error}`)
+    console.log(error)
+  })
 }
