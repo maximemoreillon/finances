@@ -89,78 +89,19 @@ app.get('/balance_accounts', (req,res) => {
   .catch( error => res.status(500).send(`Error getting measurements from Influx: ${error}`) );
 })
 
-
+const transaction_controller = require('./controllers/transactions.js')
 
 // TRANSACTIONS RELATED ROUTES
-app.get('/transactions', (req,res) => {
-  // Route to get all transactions
+app.get('/transactions', transaction_controller.get_transactions)
 
-  let account = req.query.account
-    || req.query.account_name
-    || req.params.account
-    || req.params.account_name
+app.route('/transaction')
+  .get(transaction_controller.get_transaction)
+  .put(transaction_controller.update_transaction)
+  .delete(transaction_controller.delete_transaction)
+  .post(transaction_controller.register_transactions)
 
-  if(!account) return res.status(400).send(`Missing account name`)
 
-  Transaction
-    .find({account: account})
-    .sort({date: -1})
-    .exec((err, docs) => {
-      if (err) return res.status(500).send("Error retrieving transactions from DB")
-      res.send(docs)
-    })
-})
-
-app.get('/transaction', (req,res) => {
-  // Route to get a single transaction
-  Transaction.findById(req.query._id, (err, transaction) => {
-    if(err) return res.status(500).send("Transaction not found")
-    res.send(transaction)
-  })
-})
-
-app.put('/transaction', (req,res) => {
-  // Route to update a transaction
-  Transaction.findByIdAndUpdate(req.body._id, req.body, {new: true}, (err, transaction) => {
-    if(err) return res.status(500).send("Error updating transaction")
-    res.send(transaction)
-  })
-})
-
-app.delete('/transaction', (req,res) => {
-  // Route to delete a transaction
-  Transaction.findByIdAndDelete(req.query._id, (err, transaction) => {
-    if(err) return res.status(500).send("Error deleting transaction")
-    res.send('OK')
-  });
-});
-
-app.post('/register_transactions', (req,res) => {
-  // Route to register multiple transactions
-  let bulk_operations = []
-  for (var transaction of req.body.transactions) {
-    bulk_operations.push({
-      updateOne: {
-        filter: transaction,
-        update: transaction,
-        upsert: true
-      }
-    })
-  }
-
-  Transaction.bulkWrite(bulk_operations)
-  .then( bulkWriteOpResult => res.send('OK'))
-  .catch( err => res.status(500).send("Error writing to DB"))
-
-})
-
-app.get('/transaction_accounts', (req,res) => {
-  // Route to get a single transaction
-  Transaction.find().distinct('account', (err, transaction) => {
-    if(err) return res.status(500).send("Error getting accounts")
-    res.send(transaction)
-  })
-})
+app.get('/transaction_accounts', transaction_controller.get_accounts)
 
 
 

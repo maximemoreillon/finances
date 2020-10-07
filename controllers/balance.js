@@ -39,5 +39,4 @@ exports.register_balance = (req,res) => {
     })
     .then( () => res.send("Balance registered successfully"))
     .catch(error => res.status(500).send(`Error saving data to InfluxDB! ${error}`));
-
 }

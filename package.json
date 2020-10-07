@@ -1,12 +1,12 @@
 {
   "name": "finances",
-  "version": "1.0.0",
+  "version": "2.1.3",
   "description": "",
   "main": "finances.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Maxime MOREILLON",
   "license": "ISC",
   "dependencies": {
     "@moreillon/authentication_middleware": "^1.0.1",
