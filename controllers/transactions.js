@@ -1,7 +1,7 @@
 const Transaction = require('../models/transaction')
 
 exports.get_transactions = (req,res) => {
-  // Route to get all transactions of a certain account
+  // Route to get all transactions of a given account
 
   let account = req.query.account
     || req.query.account_name
@@ -29,7 +29,7 @@ exports.get_transactions = (req,res) => {
 }
 
 exports.get_transaction = (req,res) => {
-  // Route to get a single transaction
+  // Route to get a single transaction, regardless of account
 
   let transaction_id = req.params.transaction_id
     || req.query._id
@@ -49,7 +49,7 @@ exports.get_transaction = (req,res) => {
 }
 
 exports.update_transaction = (req,res) => {
-  // Route to update a transaction
+  // Route to update a sing transaction, identified using its ID
 
   let transaction_id = req.params.transaction_id
     || req.query._id
@@ -89,8 +89,12 @@ exports.delete_transaction = (req,res) => {
 
 exports.register_transactions = (req,res) => {
   // Route to register multiple transactions
+
+  const transactions = req.body.transactions
+
+  // Create a list of operations
   let bulk_operations = []
-  for (var transaction of req.body.transactions) {
+  for (var transaction of transactions) {
     bulk_operations.push({
       updateOne: {
         filter: transaction,
@@ -112,8 +116,10 @@ exports.register_transactions = (req,res) => {
 
 }
 
+
 exports.get_accounts = (req,res) => {
-  // Route to get a single transaction
+  // Get a list of all accounts
+
   Transaction.find().distinct('account', (err, transaction) => {
     if (err) {
       console.log(err)

@@ -25,7 +25,7 @@ mongoose.connect(`${MONGODB_URL}/${DB_name}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
-});
+})
 
 
 const influx = new Influx.InfluxDB({
@@ -60,9 +60,11 @@ app.use(auth.middleware)
 app.get('/', (req,res) => {
   res.send({
     application_name: 'Finances API',
+    author: 'Maxime MOREILLON',
     version: pjson.version,
     mongodb_url: MONGODB_URL,
     mongodb_db_name: DB_name,
+    influx_db_url: process.env.INFLUXDB_URL || 'UNDEFINED',
   })
 })
 
@@ -71,11 +73,22 @@ const balance_controller = require('./controllers/balance.js')
 const transaction_controller = require('./controllers/transactions.js')
 const transaction_category_controller = require('./controllers/transaction_categories.js')
 
+app.route('accounts/:account/balance')
+  .get(balance_controller.get_current_balance)
+  .post(balance_controller.register_balance)
+
+app.route('accounts/:account/balance/current')
+  .get(balance_controller.get_current_balance)
+
+app.route('accounts/:account/balance/history')
+  .get(balance_controller.get_balance_history)
+
+// Seems to be missing routes here
 app.route('/balance')
   .post(balance_controller.register_balance)
 
 
-// Legacy
+// Legacy routes (probably unused now)
 app.post('/register_balance', balance_controller.register_balance)
 app.get('/balance_history', balance_controller.get_balance_history)
 app.get('/current_balance', balance_controller.get_current_balance)
@@ -84,6 +97,9 @@ app.get('/balance_accounts', balance_controller.get_accounts)
 
 
 // TRANSACTIONS RELATED ROUTES
+app.route('/accounts/:account/transactions')
+  .get(transaction_controller.get_transactions)
+
 app.route('/transactions')
   .get(transaction_controller.get_transactions)
   .post(transaction_controller.register_transactions)

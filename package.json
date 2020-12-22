@@ -1,6 +1,6 @@
 {
   "name": "finances",
-  "version": "2.1.5",
+  "version": "2.2.0",
   "description": "",
   "main": "finances.js",
   "scripts": {
