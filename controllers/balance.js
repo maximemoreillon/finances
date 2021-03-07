@@ -14,7 +14,7 @@ const influx = new Influx.InfluxDB({
 
 exports.register_balance = (req,res) => {
 
-  let account = req.body.account
+  const account = req.body.account
     || req.body.account_name
     || req.params.account
     || req.params.account_name
@@ -24,26 +24,29 @@ exports.register_balance = (req,res) => {
   if(!req.body.currency) return res.status(400).send(`Missing currency`)
   if(!req.body.balance) return res.status(400).send(`Missing balance`)
 
-  influx.writePoints(
-    [
-      {
-        measurement: account,
-        tags: { currency: req.body.currency, },
-        fields: { balance: req.body.balance },
-        timestamp: new Date(),
-      }
-    ], {
-      database: DB_name,
-      precision: 's',
-    })
-    .then( () => {
-      res.send("Balance registered successfully")
-      console.log(`Registered balance for account ${account}`)
-    })
-    .catch(error => {
-      console.log(error)
-      res.status(500).send(`Error saving data to InfluxDB! ${error}`)
-    })
+  const points = [
+    {
+      measurement: account,
+      tags: { currency: req.body.currency, },
+      fields: { balance: req.body.balance },
+      timestamp: new Date(),
+    }
+  ]
+
+  const options = {
+    database: DB_name,
+    precision: 's',
+  }
+
+  influx.writePoints(points,options)
+  .then( () => {
+    res.send("Balance registered successfully")
+    console.log(`Registered balance for account ${account}`)
+  })
+  .catch(error => {
+    console.log(error)
+    res.status(500).send(`Error saving data to InfluxDB! ${error}`)
+  })
 }
 
 exports.get_balance_history = (req,res) => {
@@ -73,8 +76,9 @@ exports.get_current_balance = (req,res) => {
 
   influx.query(`SELECT * FROM ${account} GROUP BY * ORDER BY DESC LIMIT 1`)
   .then( (result) => {
-    console.log(`Queried current balance for account ${account}`)
-    res.send(result[0].balance)
+    console.log(`Queried current balresult[0]ance for account ${account}`)
+    const {balance, currency} = result[0]
+    res.send({balance, currency})
   })
   .catch( (error) => {
     console.log(error)

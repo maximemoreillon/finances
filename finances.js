@@ -73,6 +73,8 @@ const balance_controller = require('./controllers/balance.js')
 const transaction_controller = require('./controllers/transactions.js')
 const transaction_category_controller = require('./controllers/transaction_categories.js')
 
+// Note: Routing difficult because some accounts do not have transactions or balance history
+
 app.route('/accounts/:account/balance')
   .get(balance_controller.get_current_balance)
   .post(balance_controller.register_balance)
@@ -87,12 +89,8 @@ app.route('/accounts/:account/balance/history')
 app.route('/balance')
   .post(balance_controller.register_balance)
 
-
-// Legacy routes (probably unused now)
-app.post('/register_balance', balance_controller.register_balance)
-app.get('/balance_history', balance_controller.get_balance_history)
-app.get('/current_balance', balance_controller.get_current_balance)
-app.get('/balance_accounts', balance_controller.get_accounts)
+app.route('/balance/accounts')
+  .get(balance_controller.get_accounts)
 
 
 

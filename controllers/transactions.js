@@ -90,7 +90,16 @@ exports.delete_transaction = (req,res) => {
 exports.register_transactions = (req,res) => {
   // Route to register multiple transactions
 
+  // Not very restul: No way to pass account as param
+
+
   const transactions = req.body.transactions
+
+  if(!transactions) {
+    console.log(err)
+    res.status(400).send(`Transactions not provided `)
+    return
+  }
 
   // Create a list of operations
   let bulk_operations = []
@@ -106,8 +115,8 @@ exports.register_transactions = (req,res) => {
 
   Transaction.bulkWrite(bulk_operations)
   .then( (bulkWriteOpResult) => {
-    res.send('OK')
-    console.log(`Transactions registered`)
+    res.send({transactions: transactions.length})
+    console.log(`${transactions.length} Transactions registered`)
   })
   .catch( (err) => {
     console.log(err)
