@@ -125,16 +125,18 @@ exports.register_transactions = (req,res) => {
 
 }
 
+const get_accounts_with_transactions = () => Transaction.find().distinct('account')
+exports.get_accounts_with_transactions = get_accounts_with_transactions
 
-exports.get_accounts = (req,res) => {
+exports.get_accounts = async (req,res) => {
   // Get a list of all accounts
+  try {
+    const accounts = await get_accounts_with_transactions()
+    res.send(accounts)
+  }
+  catch (e) {
+    res.status(500).send(e)
+  }
 
-  Transaction.find().distinct('account', (err, transaction) => {
-    if (err) {
-      console.log(err)
-      res.status(500).send(`Error getting accounts`)
-      return
-    }
-    res.send(transaction)
-  })
+
 }

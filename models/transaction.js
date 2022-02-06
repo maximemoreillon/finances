@@ -9,6 +9,6 @@ var TransactionSchema = new mongoose.Schema({
   currency: String,
 });
 
-var Transaction= mongoose.model('Transaction', TransactionSchema);
+var Transaction = mongoose.model('Transaction', TransactionSchema);
 
 module.exports = Transaction
