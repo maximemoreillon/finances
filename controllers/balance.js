@@ -1,16 +1,4 @@
-const Influx = require('influx')
-const dotenv = require('dotenv')
-
-dotenv.config()
-
-const DB_name = 'finances'
-
-const influx = new Influx.InfluxDB({
-  host: process.env.INFLUXDB_URL,
-  database: DB_name,
-})
-
-
+const {client: influx, db: DB_name} = require('../influxdb')
 
 exports.register_balance = (req,res) => {
 
@@ -86,15 +74,20 @@ exports.get_current_balance = (req,res) => {
   })
 }
 
-exports.get_accounts = (req,res) => {
+const get_accounts_with_balance = async () => {
 
-  influx.query(`SHOW MEASUREMENTS`)
-  .then( (result) => {
-    res.send(result)
-    console.log(`Queries list of accounts for balance`)
-  })
-  .catch( (error) => {
-    res.status(500).send(`Error getting measurements from Influx: ${error}`)
-    console.log(error)
-  })
+  const result = await influx.query(`SHOW MEASUREMENTS`)
+  return result.map(e => e.name)
+}
+exports.get_accounts_with_balance = get_accounts_with_balance
+
+exports.get_accounts = async (req,res) => {
+
+  try {
+    const accounts = await get_accounts_with_balance()
+    res.send(accounts)
+  }
+  catch (e) {
+    res.status(500).send(e)
+  }
 }

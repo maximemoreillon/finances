@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
+const {Schema,model} = require("mongoose");
 
-var TransactionCategorySchema = new mongoose.Schema({
+const schema = new Schema({
   label: String,
   keywords: Array,
 })
 
-var TransactionCategory = mongoose.model('TransactionCategory', TransactionCategorySchema)
+var TransactionCategory = model('TransactionCategory', schema)
 
 module.exports = TransactionCategory
