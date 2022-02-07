@@ -39,7 +39,7 @@ app.get('/', (req,res) => {
 })
 
 // Authenticate everything from here
-if(!process.env.NODE_ENV === 'development') app.use(auth.middleware)
+if(process.env.NODE_ENV !== 'development') app.use(auth.middleware)
 
 const balance_controller = require('./controllers/balance.js')
 const transaction_controller = require('./controllers/transactions.js')
