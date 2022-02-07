@@ -20,7 +20,7 @@ containerization:
     - master
   stage: containerization
   tags:
-    - moreillon
+    - dind
   before_script:
     - echo "${DOCKER_HUB_PASSWORD}" | docker login --username ${DOCKER_HUB_USERNAME} --password-stdin
   script:
@@ -41,7 +41,7 @@ deployment:
     - master
   stage: deployment
   tags:
-    - moreillon
+    - dind
   script:
     - envsubst < kubernetes_manifest.yml | kubectl apply -f -
     - kubectl rollout restart deployment/${APPLICATION_NAME}
