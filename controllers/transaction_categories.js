@@ -26,9 +26,9 @@ exports.create_category = (req,res) => {
   const category = new TransactionCategory(req.body)
 
   category.save()
-  .then(() => {
+  .then((result) => {
     console.log(`Category created`)
-    res.send(`OK`)
+    res.send(result)
   })
   .catch(error => {
     console.log(error)

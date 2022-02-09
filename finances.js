@@ -41,22 +41,11 @@ app.get('/', (req,res) => {
 // Authenticate everything from here
 if(process.env.NODE_ENV !== 'development') app.use(auth.middleware)
 
-const balance_controller = require('./controllers/balance.js')
-const transaction_controller = require('./controllers/transactions.js')
-const transaction_category_controller = require('./controllers/transaction_categories.js')
-
-// Note: Routing difficult because some accounts do not have transactions or balance history
-
 
 app.use('/accounts', require('./routes/accounts.js'))
 app.use('/balance', require('./routes/balance.js'))
 app.use('/accounts/:account/balance', require('./routes/balance.js'))
 
-
-
-
-
-// TRANSACTIONS RELATED ROUTES
 app.use('/transactions', require('./routes/transactions.js'))
 app.use('/accounts/:account/transactions', require('./routes/transactions.js'))
 
