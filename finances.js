@@ -51,7 +51,7 @@ app.get('/', (req,res) => {
 })
 
 // Authenticate everything from here
-if(process.env.NODE_ENV !== 'development') app.use(auth({url: AUTHENTICATION_URL}))
+if(process.env.NODE_ENV !== 'development') app.use(auth({url: AUTHENTICATION_API_URL}))
 if(AUTHORIZED_GROUPS && GROUP_AUTHORIZATION_URL) {
   console.log(`[Auth] Enabling group-based authorization`)
   const group_auth_options = {
