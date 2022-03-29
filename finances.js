@@ -1,5 +1,5 @@
-// NPM modules
 require('dotenv').config()
+
 const express = require('express')
 const cors = require('cors')
 const auth = require('@moreillon/authentication_middleware')
@@ -9,6 +9,7 @@ const {url: influxdb_url, db: influxdb_db} = require('./influxdb.js')
 
 const {version, author} = require('./package.json')
 
+console.log(`Finances manager v${version}`);
 
 const {
   APP_PORT = 80,
@@ -16,7 +17,6 @@ const {
   AUTHORIZED_GROUPS,
   GROUP_AUTHORIZATION_URL
 } = process.env
-
 
 // Set timezone
 process.env.TZ = 'Asia/Tokyo'
@@ -52,7 +52,7 @@ app.get('/', (req,res) => {
 // Authenticate everything from here
 if(process.env.NODE_ENV !== 'development') app.use(auth.middleware)
 if(AUTHORIZED_GROUPS && GROUP_AUTHORIZATION_URL) {
-  console.log(`Enabling group-based authorization`)
+  console.log(`[Auth] Enabling group-based authorization`)
   const group_auth_options = {
     url: GROUP_AUTHORIZATION_URL,
     groups: AUTHORIZED_GROUPS.split(',')
