@@ -11,6 +11,7 @@
   "dependencies": {
     "@moreillon/authentication_middleware": "^1.0.1",
     "@moreillon/express_group_based_authorization_middleware": "^2.1.5",
+    "@moreillon/express_identification_middleware": "^1.1.0",
     "axios": "^0.26.1",
     "connect-history-api-fallback": "^1.6.0",
     "cookie-session": "^1.4.0",
