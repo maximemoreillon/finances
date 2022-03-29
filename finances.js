@@ -51,14 +51,14 @@ app.get('/', (req,res) => {
 
 // Authenticate everything from here
 if(process.env.NODE_ENV !== 'development') app.use(auth.middleware)
-if(AUTHORIZED_GROUPS && GROUP_AUTHORIZATION_URL) {
-  console.log(`[Auth] Enabling group-based authorization`)
-  const group_auth_options = {
-    url: GROUP_AUTHORIZATION_URL,
-    groups: AUTHORIZED_GROUPS.split(',')
-  }
-  app.use(group_auth(group_auth_options))
-}
+// if(AUTHORIZED_GROUPS && GROUP_AUTHORIZATION_URL) {
+//   console.log(`[Auth] Enabling group-based authorization`)
+//   const group_auth_options = {
+//     url: GROUP_AUTHORIZATION_URL,
+//     groups: AUTHORIZED_GROUPS.split(',')
+//   }
+//   app.use(group_auth(group_auth_options))
+// }
 
 
 app.use('/accounts', require('./routes/accounts.js'))
