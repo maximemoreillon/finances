@@ -35,8 +35,10 @@ app.get('/', (req,res) => {
     application_name: 'Finances API',
     author,
     version,
-    mongodb: { url: mongodb_url, db: mongodb_db },
-    influxdb: {url: influxdb_url, db: influxdb_db},
+    databases: {
+      mongodb: { url: mongodb_url, db: mongodb_db },
+      influxdb: { url: influxdb_url, db: influxdb_db },
+    },
     auth: {
       identification_url: IDENTIFICATION_URL,
       group_auth: {

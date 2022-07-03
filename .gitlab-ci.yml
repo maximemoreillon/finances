@@ -6,8 +6,6 @@ variables:
   APPLICATION_NAME: finances
   CONTAINER_IMAGE: ${DOCKER_HUB_USERNAME}/${APPLICATION_NAME}
   CONTAINER_IMAGE_TAGGED: ${DOCKER_HUB_USERNAME}/${APPLICATION_NAME}:${CI_COMMIT_SHORT_SHA}
-
-
   CERTIFICATE_DOMAIN: api.finances.maximemoreillon.com
 
 image: moreillon/ci-dind
