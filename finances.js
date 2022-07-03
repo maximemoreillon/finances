@@ -2,7 +2,6 @@ require('dotenv').config()
 
 const express = require('express')
 const cors = require('cors')
-// const auth = require('@moreillon/authentication_middleware')
 const auth = require('@moreillon/express_identification_middleware')
 const group_auth = require('@moreillon/express_group_based_authorization_middleware')
 const {connect: mongodb_connect, url: mongodb_url, db: mongodb_db} = require('./mongodb.js')
@@ -14,7 +13,7 @@ console.log(`Finances manager v${version}`);
 
 const {
   APP_PORT = 80,
-  AUTHENTICATION_API_URL,
+  IDENTIFICATION_URL,
   AUTHORIZED_GROUPS,
   GROUP_AUTHORIZATION_URL
 } = process.env
@@ -22,8 +21,6 @@ const {
 // Set timezone
 process.env.TZ = 'Asia/Tokyo'
 
-// configure the authorization middleware
-// auth.authentication_api_url = `${AUTHENTICATION_API_URL}/decode_jwt`
 
 mongodb_connect()
 
@@ -41,7 +38,7 @@ app.get('/', (req,res) => {
     mongodb: { url: mongodb_url, db: mongodb_db },
     influxdb: {url: influxdb_url, db: influxdb_db},
     auth: {
-      api_url: AUTHENTICATION_API_URL,
+      identification_url: IDENTIFICATION_URL,
       group_auth: {
         url: GROUP_AUTHORIZATION_URL,
         groups: AUTHORIZED_GROUPS
@@ -51,7 +48,7 @@ app.get('/', (req,res) => {
 })
 
 // Authenticate everything from here
-if(process.env.NODE_ENV !== 'development') app.use(auth({url: AUTHENTICATION_API_URL}))
+if (process.env.NODE_ENV !== 'development') app.use(auth({ url: IDENTIFICATION_URL }))
 if(AUTHORIZED_GROUPS && GROUP_AUTHORIZATION_URL) {
   console.log(`[Auth] Enabling group-based authorization`)
   const group_auth_options = {
