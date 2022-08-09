@@ -6,6 +6,9 @@ const auth = require('@moreillon/express_identification_middleware')
 const group_auth = require('@moreillon/express_group_based_authorization_middleware')
 const {connect: mongodb_connect, url: mongodb_url, db: mongodb_db} = require('./mongodb.js')
 const {url: influxdb_url, db: influxdb_db} = require('./influxdb.js')
+const apiMetrics = require('prometheus-api-metrics')
+
+
 
 const {version, author} = require('./package.json')
 
@@ -29,6 +32,9 @@ const app = express()
 // Express configuration
 app.use(express.json())
 app.use(cors())
+app.use(apiMetrics())
+
+
 
 app.get('/', (req,res) => {
   res.send({
