@@ -1,78 +1,68 @@
-const {client: influx, db: DB_name} = require('../influxdb')
+const createHttpError = require('http-errors')
+const { Point } = require('@influxdata/influxdb-client')
+const {
+  org,
+  bucket,
+  writeApi,
+  influx_read,
+  deleteApi,
+  measurement
+} = require('../influxdb')
 
-exports.register_balance = (req,res) => {
 
-  const account = req.body.account
-    || req.body.account_name
-    || req.params.account
-    || req.params.account_name
+exports.register_balance = async (req,res, next) => {
 
-  if(!account) return res.status(400).send(`Missing account name`)
+  try {
 
-  if(!req.body.currency) return res.status(400).send(`Missing currency`)
-  if(!req.body.balance) return res.status(400).send(`Missing balance`)
+    // TODO: use params
+    const account = req.body.account
+      || req.body.account_name
+      || req.params.account
+      || req.params.account_name
+    
+    const {
+      currency,
+      balance,
+      time,
+    } = req.body
 
-  const points = [
-    {
-      measurement: account,
-      tags: { currency: req.body.currency, },
-      fields: { balance: req.body.balance },
-      timestamp: new Date(),
-    }
-  ]
+    if (!currency) throw createHttpError(400, `currency not provided`)
+    if (!balance) throw createHttpError(400, `balance not provided`)
+    if (!account) throw createHttpError(400, `Account not defined`)
 
-  const options = {
-    database: DB_name,
-    precision: 's',
+    // Create point
+    const point = new Point(account).tag('currency', currency)
+
+    // Timestamp
+    if (time) point.timestamp(new Date(time))
+    else point.timestamp(new Date())
+
+    // Add weight
+    if ((typeof balance) === 'number') point.floatField('balance', balance)
+    else point.floatField('balance', parseFloat(balance))
+
+
+    // write (flush is to actually perform the operation)
+    writeApi.writePoint(point)
+    await writeApi.flush()
+
+    console.log(`Point created in measurement ${account}: ${balance}`)
+
+    // Respond
+    res.send(point)
+
   }
-
-  influx.writePoints(points,options)
-  .then( () => {
-    res.send("Balance registered successfully")
-    console.log(`Registered balance for account ${account}`)
-  })
-  .catch(error => {
-    console.log(error)
-    res.status(500).send(`Error saving data to InfluxDB! ${error}`)
-  })
+  catch (error) {
+    next(error)
+  }
 }
 
 exports.get_balance_history = (req,res) => {
 
-  let account = req.params.account
-    || req.query.account
+  res.status(501).send('not implemented')
 
-  if(!account) return res.status(400).send(`Missing account name`)
-
-  influx.query(`SELECT * FROM ${account}`)
-  .then( (result) => {
-    res.send(result)
-    console.log(`Queried balance history for account ${account}`)
-  })
-  .catch( (error) => {
-    console.log(error)
-    res.status(500).send(`Error getting balance from Influx: ${error}`)
-  })
 }
 
-exports.get_current_balance = (req,res) => {
-
-  let account = req.params.account
-    || req.query.account
-
-  if(!account) return res.status(400).send(`Missing account name`)
-
-  influx.query(`SELECT * FROM ${account} GROUP BY * ORDER BY DESC LIMIT 1`)
-  .then( (result) => {
-    console.log(`Queried current balresult[0]ance for account ${account}`)
-    const {balance, currency} = result[0]
-    res.send({balance, currency})
-  })
-  .catch( (error) => {
-    console.log(error)
-    res.status(500).send(`Error getting balance from Influx: ${error}`)
-  })
-}
 
 const get_accounts_with_balance = async () => {
 
