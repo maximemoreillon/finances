@@ -22,8 +22,6 @@ spec:
           value: https://api.groups.maximemoreillon.com/v3/users/self/groups
         - name: AUTHORIZED_GROUPS
           value: 0035cdb9-838a-4cdd-8ab5-61dafdf569d8
-        - name: INFLUXDB_URL
-          value: 192.168.1.2
         envFrom:
         - secretRef:
            name: environment-variables
