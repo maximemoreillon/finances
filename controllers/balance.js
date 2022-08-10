@@ -61,11 +61,7 @@ exports.get_balance_history = async (req, res, next) => {
 
   try {
 
-    // TODO: use params
-    const account = req.query.account
-      || req.query.account_name
-      || req.params.account
-      || req.params.account_name
+    const {account} = req.params
 
     // Filters
     // Using let because some variable types might change
@@ -143,7 +139,7 @@ exports.get_accounts = async (req,res) => {
     const accounts = await get_accounts_with_balance()
     res.send(accounts)
   }
-  catch (e) {
-    res.status(500).send(e)
+  catch (error) {
+    next(error)
   }
 }

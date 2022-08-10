@@ -7,7 +7,6 @@ const {
 
 const router = Router({mergeParams: true})
 
-// Seems to be missing routes here
 router.route('/')
   .get(get_balance_history)
   .post(register_balance)
