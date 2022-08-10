@@ -1,30 +1,62 @@
-const Influx = require('influx')
+const dotenv = require('dotenv')
+const { InfluxDB } = require('@influxdata/influxdb-client')
+const { DeleteAPI } = require('@influxdata/influxdb-client-apis')
+const { Agent } = require('http')
+
+dotenv.config()
+
+const agent = new Agent({
+    keepAlive: true,
+    keepAliveMsecs: 20 * 1000, // 20 seconds keep alive
+})
 
 
 const {
-  INFLUXDB_URL = 'http://influxdb',
-  INFLUXDB_DB = 'finances'
+    INFLUXDB_URL = 'localhost',
+    INFLUXDB_TOKEN,
+    INFLUXDB_ORG,
+    INFLUXDB_BUCKET = 'finances',
+    PRECISION = 'ns',
 } = process.env
 
-const influx = new Influx.InfluxDB({
-  host: INFLUXDB_URL,
-  database: INFLUXDB_DB,
+
+const influxDb = new InfluxDB({
+    url: INFLUXDB_URL,
+    token: INFLUXDB_TOKEN,
+    transportOptions: { agent }
 })
 
-// Create DB if it does not exist
-exports.create_db_if_not_exist = () => {
-  console.log(`[InfluxDB] Creating database ${INFLUXDB_DB}`);
-  influx.getDatabaseNames()
-    .then(names => {
-      if (!names.includes(INFLUXDB_DB)) influx.createDatabase(INFLUXDB_DB);
-      else `[InfluxDB] Database ${INFLUXDB_DB} already existed`
-    })
-    .catch(err => {
-      console.error(`Error creating Influx database! ${err}`);
-    })
-}
+const writeApi = influxDb.getWriteApi(INFLUXDB_ORG, INFLUXDB_BUCKET, PRECISION)
+const queryApi = influxDb.getQueryApi(INFLUXDB_ORG)
+const deleteApi = new DeleteAPI(influxDb)
 
 
-exports.client = influx
+
+const influx_read = (query) => new Promise((resolve, reject) => {
+    // helper function for Influx queries
+
+    const results = []
+    queryApi.queryRows(query, {
+        next(row, tableMeta) {
+            // TODO: Find way to convert directly to an array
+            const result = tableMeta.toObject(row)
+            results.push(result)
+        },
+        error(error) {
+            reject(error)
+        },
+        complete() {
+            resolve(results)
+        },
+    })
+})
+
+
 exports.url = INFLUXDB_URL
-exports.db = INFLUXDB_DB
+exports.org = INFLUXDB_ORG
+exports.bucket = INFLUXDB_BUCKET
+exports.token = INFLUXDB_TOKEN
+exports.queryApi = queryApi
+exports.writeApi = writeApi
+exports.deleteApi = deleteApi
+exports.influx_read = influx_read

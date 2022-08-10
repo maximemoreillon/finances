@@ -1,4 +1,3 @@
-require('dotenv').config()
 
 const express = require('express')
 const cors = require('cors')
@@ -7,6 +6,9 @@ const group_auth = require('@moreillon/express_group_based_authorization_middlew
 const {connect: mongodb_connect, url: mongodb_url, db: mongodb_db} = require('./mongodb.js')
 const {url: influxdb_url, db: influxdb_db} = require('./influxdb.js')
 const apiMetrics = require('prometheus-api-metrics')
+const dotenv = require('dotenv')
+
+dotenv.config()
 
 
 
@@ -22,7 +24,7 @@ const {
 } = process.env
 
 // Set timezone
-process.env.TZ = 'Asia/Tokyo'
+process.env.TZ = process.env.TZ || 'Asia/Tokyo'
 
 
 mongodb_connect()
