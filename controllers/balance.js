@@ -121,10 +121,19 @@ exports.get_balance_history = async (req, res, next) => {
 }
 
 
+
 const get_accounts_with_balance = async () => {
 
-  const result = await influx.query(`SHOW MEASUREMENTS`)
-  return result.map(e => e.name)
+  const query = `
+    import \"influxdata/influxdb/schema\"
+    schema.measurements(bucket: \"${bucket}\")
+    `
+
+  // Run the query
+  const result = await influx_read(query)
+
+  // Extract measurements from result
+  return result.map(r => r._value)
 }
 exports.get_accounts_with_balance = get_accounts_with_balance
 
