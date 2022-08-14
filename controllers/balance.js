@@ -70,7 +70,6 @@ exports.get_balance_history = async (req, res, next) => {
       stop,
       tags = [],
       fields = [],
-      limit = 500, // Limit point count by default, note: this is approximative
     } = req.query
 
     const stop_query = stop ? (`stop: ${stop}`) : ''
@@ -81,25 +80,11 @@ exports.get_balance_history = async (req, res, next) => {
     if (typeof fields === 'string') fields = [fields]
 
     // NOTE: check for risks of injection
-    let query = `
+    const query = `
       from(bucket:"${bucket}")
       |> range(start: ${start}, ${stop_query})
       |> filter(fn: (r) => r._measurement == "${account}")
       `
-
-
-    // subsampling
-    if (Number(limit)) {
-      // Getting point count to compute the sampling from the limit
-      const count_query = query + `|> count()`
-      const record_count_query_result = await influx_read(count_query)
-      const record_count = record_count_query_result[0]._value // Dirty here
-      const sampling = Math.max(Math.round(12 * record_count / (limit)), 1) // Not sure why 12
-
-      // Apply subsampling
-      query += `|> sample(n:${sampling})`
-    }
-
 
     // Run the query
     const points = await influx_read(query)
