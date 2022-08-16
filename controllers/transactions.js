@@ -113,7 +113,7 @@ exports.register_transactions = async (req, res, next) => {
 
 
     const bulkWriteOpResult = await Transaction.bulkWrite(bulk_operations)
-    console.log(`${transactions.length} Transactions registered`)
+    console.log(`${transactions.length} Transactions registered for account ${account}`)
     res.send(bulkWriteOpResult)
   }
   catch (error) {
