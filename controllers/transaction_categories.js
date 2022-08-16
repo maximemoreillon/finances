@@ -1,50 +1,39 @@
 const TransactionCategory = require('../models/transaction_category')
 
-exports.get_categories = (req,res) => {
+exports.get_categories = async (req,res,next) => {
   // Route to get all transaction categories
 
+  try {
+    const categories = await TransactionCategory
+      .find({})
 
-  TransactionCategory
-    .find({})
-    .exec((err, docs) => {
+    res.send(categories)
+  }
+  catch (error) {
+    next(error)
+  }
 
-      // Error handling
-      if (err) {
-        console.log(err)
-        res.status(500).send(`Error retrieving transaction categories`)
-        return
-      }
 
-      res.send(docs)
-
-      console.log(`Transactions categories`)
-    })
 }
 
-exports.create_category = (req,res) => {
+exports.create_category = async (req,res) => {
 
-  const category = new TransactionCategory(req.body)
+  try {
+    const category = await TransactionCategory.create(req.body)
+    res.send(category)
+  }
+  catch (error) {
+    next(error)
+  }
 
-  category.save()
-  .then((result) => {
-    console.log(`Category created`)
-    res.send(result)
-  })
-  .catch(error => {
-    console.log(error)
-    res.status(500).send(`Error creating category`)
-  })
+  
+
 }
 
 exports.get_category = (req,res) => {
   // Route to get all transaction categories
 
-  let category_id = req.params.transaction_category_id
-    || req.params.category_id
-    || req.query.transaction_category_id
-    || req.query.category_id
-    || req.query.id
-    || req.query._id
+  const {category_id} = req.params
 
   TransactionCategory.findById(category_id, (err, category) => {
     // Error handling

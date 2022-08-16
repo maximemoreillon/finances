@@ -1,8 +1,10 @@
 const {Router} = require('express')
 const {
-  get_transactions,
   register_transactions,
-  get_accounts
+  get_transactions,
+  get_transaction,
+  get_accounts,
+  delete_transaction
 } = require('../controllers/transactions.js')
 
 const router = Router({mergeParams: true})
@@ -11,11 +13,18 @@ router.route('/')
   .get(get_transactions)
   .post(register_transactions)
 
+router.use('/categories', require('./transaction_categories'))
+
 // Route to get accounts that have transactions
 router.route('/accounts')
   .get(get_accounts)
 
-router.use('/categories', require('./transaction_categories'))
+router.route('/:transaction_id')
+  .get(get_transaction)
+  .delete(delete_transaction)
+
+
+
 
 
 module.exports = router

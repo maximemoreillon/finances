@@ -6,29 +6,22 @@ exports.get_transactions = async (req, res, next) => {
 
   // Once routing has been cleaned up, only req.params.account should be used
 
-  const account = req.query.account
-    || req.query.account_name
-    || req.params.account
-    || req.params.account_name
+  try {
+    const {account} =  req.params
+    if (!account) throw createHttpError(400, 'Missing acount')
 
-  if (!account) throw createHttpError(400, 'Missing acount')
+    const transactions = await Transaction
+      .find({ account })
+      .sort({ date: -1 })
+    
+    console.log(`Transactions of account ${account} queried`)
+    res.send(transactions)
 
-  Transaction
-    .find({account: account})
-    .sort({date: -1})
-    .exec((err, docs) => {
+  }
+  catch (error) {
+    next(error)
+  }
 
-      // Error handling
-      if (err) {
-        console.log(err)
-        res.status(500).send(`Error retrieving transactions of account ${account}`)
-        return
-      }
-
-      res.send(docs)
-
-      console.log(`Transactions of account ${account} queried`)
-    })
 }
 
 exports.get_transaction = async (req, res, next) => {
