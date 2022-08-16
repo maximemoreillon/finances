@@ -12,5 +12,6 @@ router.route('/')
   .get(get_accounts)
 
 router.use('/:account/balance', require('./balance'))
+router.use('/:account/transactions', require('./transactions'))
 
 module.exports = router

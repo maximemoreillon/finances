@@ -2,7 +2,7 @@
   "name": "finances",
   "version": "3.0.3",
   "description": "",
-  "main": "finances.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -11,6 +11,7 @@ router.route('/')
   .get(get_transactions)
   .post(register_transactions)
 
+// Route to get accounts that have transactions
 router.route('/accounts')
   .get(get_accounts)
 

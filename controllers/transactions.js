@@ -1,15 +1,17 @@
 const Transaction = require('../models/transaction')
 const createHttpError = require('http-errors')
 
-exports.get_transactions = (req, res, next) => {
+exports.get_transactions = async (req, res, next) => {
   // Route to get all transactions of a given account
+
+  // Once routing has been cleaned up, only req.params.account should be used
 
   const account = req.query.account
     || req.query.account_name
     || req.params.account
     || req.params.account_name
 
-  if(!account) return res.status(400).send(`Missing account name`)
+  if (!account) throw createHttpError(400, 'Missing acount')
 
   Transaction
     .find({account: account})
@@ -29,100 +31,97 @@ exports.get_transactions = (req, res, next) => {
     })
 }
 
-exports.get_transaction = (req, res, next) => {
+exports.get_transaction = async (req, res, next) => {
   // Route to get a single transaction, regardless of account
 
-  let transaction_id = req.params.transaction_id
-    || req.query._id
+  try {
+    const { transaction_id } = req.params
 
-  Transaction.findById(transaction_id, (err, transaction) => {
-    // Error handling
-    if (err) {
-      console.log(message)
-      res.status(500).send(`Error retrieving transaction ${transaction_id}`)
-      return
-    }
+    if (!transaction_id) throw createHttpError(400, 'Missing transaction_id')
+
+    const transaction = await Transaction.findById(transaction_id)
+    console.log(`Transaction ${transaction_id} queried`)
 
     res.send(transaction)
+  }
 
-    console.log(`Transaction ${transaction_id} queried`)
-  })
+
+  catch (error) {
+    next(error)
+  }
+
+
 }
 
-exports.update_transaction = (req, res, next) => {
+exports.update_transaction = async (req, res, next) => {
   // Route to update a sing transaction, identified using its ID
 
-  let transaction_id = req.params.transaction_id
-    || req.query._id
+  try {
+    const { transaction_id } = req.params
 
-  Transaction.findByIdAndUpdate(transaction_id, req.body, {new: true}, (err, transaction) => {
-    // Error handling
-    if (err) {
-      console.log(err)
-      res.status(500).send(`Error updating transaction ${transaction_id}`)
-      return
-    }
+    if (!transaction_id) throw createHttpError(400, 'Missing transaction_id')
 
-    res.send(transaction)
+    const result = Transaction.findByIdAndUpdate(transaction_id, req.body, { new: true })
     console.log(`Transaction ${transaction_id} updated`)
-  })
+
+    res.send(result)
+  }
+  
+
+  catch (error) {
+    next(error)
+  }
+
 }
 
-exports.delete_transaction = (req, res, next) => {
-  // Route to delete a transaction
+exports.delete_transaction = async (req, res, next) => {
 
-  let transaction_id = req.params.transaction_id
-    || req.query._id
+  try {
+    const { transaction_id } = req.params
 
-  Transaction.findByIdAndDelete(transaction_id, (err, transaction) => {
+    if (!transaction_id) throw createHttpError(400, 'Missing transaction_id')
 
-    if (err) {
-      console.log(err)
-      res.status(500).send(`Error deleting transaction ${transaction_id} `)
-      return
-    }
+    const result = await Transaction.findByIdAndDelete(transaction_id)
 
-    res.send('OK')
+    res.send(result)
 
-    console.log(`Transaction ${transaction_id} deleted`)
-  })
+  }
+  catch (error) {
+    next(error)
+  }
+
+
 }
 
-exports.register_transactions = (req, res, next) => {
+exports.register_transactions = async (req, res, next) => {
   // Route to register multiple transactions
 
-  // Not very restul: No way to pass account as param
+  try {
+    const { account } = req.params
+    const { transactions } = req.body
 
+    if (!transactions) throw createHttpError(400, 'Missing transactions')
 
-  const {transactions} = req.body
-
-  if(!transactions) {
-    console.log(err)
-    res.status(400).send(`Transactions not provided `)
-    return
-  }
-
-  // Create a list of operations
-  let bulk_operations = []
-  for (var transaction of transactions) {
-    bulk_operations.push({
+    // Create a list of operations
+    const bulk_operations = transactions.map( transaction => ({
       updateOne: {
-        filter: transaction,
-        update: transaction,
+        filter: { account, ...transaction },
+        update: { account, ...transaction },
         upsert: true
       }
-    })
+    }))
+
+
+    const bulkWriteOpResult = await Transaction.bulkWrite(bulk_operations)
+    console.log(`${transactions.length} Transactions registered`)
+    res.send(bulkWriteOpResult)
+  }
+  catch (error) {
+    next(error)
   }
 
-  Transaction.bulkWrite(bulk_operations)
-  .then( (bulkWriteOpResult) => {
-    res.send({transactions: transactions.length})
-    console.log(`${transactions.length} Transactions registered`)
-  })
-  .catch( (err) => {
-    console.log(err)
-    res.status(500).send("Error writing to DB")
-  })
+
+
 
 }
 
