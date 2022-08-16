@@ -70,11 +70,10 @@ if(AUTHORIZED_GROUPS && GROUP_AUTHORIZATION_URL) {
 
 
 app.use('/accounts', require('./routes/accounts.js'))
-app.use('/balance', require('./routes/balance.js'))
-app.use('/accounts/:account/balance', require('./routes/balance.js'))
 
+// Those are not RESTful
+app.use('/balance', require('./routes/balance.js'))
 app.use('/transactions', require('./routes/transactions.js'))
-app.use('/accounts/:account/transactions', require('./routes/transactions.js'))
 
 
 // Start server
