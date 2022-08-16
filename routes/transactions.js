@@ -1,17 +1,20 @@
 const {Router} = require('express')
-const transaction_categories_router = require('./transaction_categories.js')
-const transaction_controller = require('../controllers/transactions.js')
+const {
+  get_transactions,
+  register_transactions,
+  get_accounts
+} = require('../controllers/transactions.js')
 
 const router = Router({mergeParams: true})
 
 router.route('/')
-  .get(transaction_controller.get_transactions)
-  .post(transaction_controller.register_transactions)
+  .get(get_transactions)
+  .post(register_transactions)
 
 router.route('/accounts')
-  .get(transaction_controller.get_accounts)
+  .get(get_accounts)
 
-router.use('/categories', transaction_categories_router)
+router.use('/categories', require('./transaction_categories'))
 
 
 module.exports = router

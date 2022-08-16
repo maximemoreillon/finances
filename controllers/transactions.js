@@ -1,9 +1,10 @@
 const Transaction = require('../models/transaction')
+const createHttpError = require('http-errors')
 
-exports.get_transactions = (req,res) => {
+exports.get_transactions = (req, res, next) => {
   // Route to get all transactions of a given account
 
-  let account = req.query.account
+  const account = req.query.account
     || req.query.account_name
     || req.params.account
     || req.params.account_name
@@ -28,7 +29,7 @@ exports.get_transactions = (req,res) => {
     })
 }
 
-exports.get_transaction = (req,res) => {
+exports.get_transaction = (req, res, next) => {
   // Route to get a single transaction, regardless of account
 
   let transaction_id = req.params.transaction_id
@@ -48,7 +49,7 @@ exports.get_transaction = (req,res) => {
   })
 }
 
-exports.update_transaction = (req,res) => {
+exports.update_transaction = (req, res, next) => {
   // Route to update a sing transaction, identified using its ID
 
   let transaction_id = req.params.transaction_id
@@ -67,7 +68,7 @@ exports.update_transaction = (req,res) => {
   })
 }
 
-exports.delete_transaction = (req,res) => {
+exports.delete_transaction = (req, res, next) => {
   // Route to delete a transaction
 
   let transaction_id = req.params.transaction_id
@@ -87,13 +88,13 @@ exports.delete_transaction = (req,res) => {
   })
 }
 
-exports.register_transactions = (req,res) => {
+exports.register_transactions = (req, res, next) => {
   // Route to register multiple transactions
 
   // Not very restul: No way to pass account as param
 
 
-  const transactions = req.body.transactions
+  const {transactions} = req.body
 
   if(!transactions) {
     console.log(err)
@@ -128,14 +129,14 @@ exports.register_transactions = (req,res) => {
 const get_accounts_with_transactions = () => Transaction.find().distinct('account')
 exports.get_accounts_with_transactions = get_accounts_with_transactions
 
-exports.get_accounts = async (req,res) => {
+exports.get_accounts = async (req,res, next) => {
   // Get a list of all accounts
   try {
     const accounts = await get_accounts_with_transactions()
     res.send(accounts)
   }
   catch (e) {
-    res.status(500).send(e)
+    next(e)
   }
 
 
