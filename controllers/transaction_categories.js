@@ -16,7 +16,7 @@ exports.get_categories = async (req,res,next) => {
 
 }
 
-exports.create_category = async (req,res) => {
+exports.create_category = async (req,res, next) => {
 
   try {
     const category = await TransactionCategory.create(req.body)
@@ -30,69 +30,56 @@ exports.create_category = async (req,res) => {
 
 }
 
-exports.get_category = (req,res) => {
+exports.get_category = async (req,res, next) => {
   // Route to get all transaction categories
 
-  const {category_id} = req.params
+  try {
+    const { category_id } = req.params
 
-  TransactionCategory.findById(category_id, (err, category) => {
-    // Error handling
-    if (err) {
-      console.log(message)
-      res.status(500).send(`Error retrieving category ${category_id}`)
-      return
-    }
+    const properties = req.body
 
-    res.send(category)
-
+    const category = await TransactionCategory.findById(category_id)
     console.log(`Transaction category ${category_id} queried`)
-  })
+    res.send(category)
+  }
+  catch (error) {
+    next(error)
+  }
+
 }
 
 
-exports.update_category = (req,res) => {
-  // Route to update a transaction
+exports.update_category = async (req,res, next) => {
 
-  let category_id = req.params.transaction_category_id
-    || req.params.category_id
-    || req.query.transaction_category_id
-    || req.query.category_id
-    || req.query.id
-    || req.query._id
+  try {
+    const { category_id } = req.params
 
-  TransactionCategory.findByIdAndUpdate(category_id, req.body, {new: true}, (err, transaction) => {
-    // Error handling
-    if (err) {
-      console.log(err)
-      res.status(500).send(`Error updating category ${category_id}`)
-      return
-    }
+    const properties = req.body
 
-    res.send(transaction)
+    const result = await TransactionCategory.findByIdAndUpdate(category_id, properties)
     console.log(`Transaction category ${category_id} updated`)
-  })
+    res.send(result)
+  }
+  catch (error) {
+    next(error)
+  }
+
+
+
 }
 
-exports.delete_category = (req,res) => {
-  // Route to delete a transaction
+exports.delete_category = async (req,res, next) => {
 
-  let category_id = req.params.transaction_category_id
-    || req.params.category_id
-    || req.query.transaction_category_id
-    || req.query.category_id
-    || req.query.id
-    || req.query._id
+  try {
+    const { category_id } = req.params
 
-  TransactionCategory.findByIdAndDelete(category_id, (err, transaction) => {
-
-    if (err) {
-      console.log(err)
-      res.status(500).send(`Error deleting category ${category_id} `)
-      return
-    }
-
-    res.send('OK')
-
+    const result = await TransactionCategory.findByIdAndDelete(category_id)
     console.log(`Transaction category ${category_id} deleted`)
-  })
+    res.send(result)
+  }
+  catch (error) {
+    next(error)
+  }
+
+
 }
