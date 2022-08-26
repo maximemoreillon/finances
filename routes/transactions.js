@@ -4,6 +4,7 @@ const {
   get_transactions,
   get_transaction,
   get_accounts,
+  update_transaction,
   delete_transaction
 } = require('../controllers/transactions.js')
 
@@ -22,6 +23,8 @@ router.route('/accounts')
 router.route('/:transaction_id')
   .get(get_transaction)
   .delete(delete_transaction)
+  .patch(update_transaction)
+  .put(update_transaction)
 
 
 

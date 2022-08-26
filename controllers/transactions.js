@@ -47,14 +47,14 @@ exports.get_transaction = async (req, res, next) => {
 }
 
 exports.update_transaction = async (req, res, next) => {
-  // Route to update a sing transaction, identified using its ID
+  // Route to update a single transaction, identified using its ID
 
   try {
     const { transaction_id } = req.params
 
     if (!transaction_id) throw createHttpError(400, 'Missing transaction_id')
 
-    const result = Transaction.findByIdAndUpdate(transaction_id, req.body, { new: true })
+    const result = await Transaction.findByIdAndUpdate(transaction_id, req.body, { new: true })
     console.log(`Transaction ${transaction_id} updated`)
 
     res.send(result)
