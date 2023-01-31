@@ -1,9 +1,9 @@
-/*
-Currently unused
-*/
-const {Schema,model} = require("mongoose")
+// Currently unused
 
-const transactionSchema = new Schema ({
+const { Schema, model } = require("mongoose")
+
+// TODO: to be merged with existing schema
+const transactionSchema = new Schema({
   description: String,
   amount: Number,
   date: Date,
@@ -12,8 +12,10 @@ const transactionSchema = new Schema ({
 })
 
 // Balance can be kept track in an influxdb measurement named after the account id
-const accountSchema = new Schema ({
+const accountSchema = new Schema({
   user_id: String,
   name: String,
   transactions: [transactionSchema],
 })
+
+module.exports = model("Account", accountSchema)

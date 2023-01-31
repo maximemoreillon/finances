@@ -1,14 +1,17 @@
-const mongoose = require("mongoose");
+const { Schema, model } = require("mongoose")
 
-var TransactionSchema = new mongoose.Schema({
+const TransactionSchema = new Schema({
   account: String,
   description: String,
   amount: Number,
   date: Date,
   business_expense: Boolean,
   currency: String,
-});
 
-var Transaction = mongoose.model('Transaction', TransactionSchema);
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: "TransactionCategory",
+  },
+})
 
-module.exports = Transaction
+module.exports = model("Transaction", TransactionSchema)
