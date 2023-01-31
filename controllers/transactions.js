@@ -1,5 +1,5 @@
-const Transaction = require('../models/transaction')
-const createHttpError = require('http-errors')
+const Transaction = require("../models/transaction")
+const createHttpError = require("http-errors")
 
 exports.get_transactions = async (req, res, next) => {
   // Route to get all transactions of a given account
@@ -7,21 +7,18 @@ exports.get_transactions = async (req, res, next) => {
   // Once routing has been cleaned up, only req.params.account should be used
 
   try {
-    const {account} =  req.params
-    if (!account) throw createHttpError(400, 'Missing acount')
+    const { account } = req.params
+    if (!account) throw createHttpError(400, "Missing acount")
 
-    const transactions = await Transaction
-      .find({ account })
+    const transactions = await Transaction.find({ account })
       .sort({ date: -1 })
-    
+      .populate("category")
+
     console.log(`Transactions of account ${account} queried`)
     res.send(transactions)
-
-  }
-  catch (error) {
+  } catch (error) {
     next(error)
   }
-
 }
 
 exports.get_transaction = async (req, res, next) => {
@@ -30,20 +27,15 @@ exports.get_transaction = async (req, res, next) => {
   try {
     const { transaction_id } = req.params
 
-    if (!transaction_id) throw createHttpError(400, 'Missing transaction_id')
+    if (!transaction_id) throw createHttpError(400, "Missing transaction_id")
 
     const transaction = await Transaction.findById(transaction_id)
     console.log(`Transaction ${transaction_id} queried`)
 
     res.send(transaction)
-  }
-
-
-  catch (error) {
+  } catch (error) {
     next(error)
   }
-
-
 }
 
 exports.update_transaction = async (req, res, next) => {
@@ -52,38 +44,33 @@ exports.update_transaction = async (req, res, next) => {
   try {
     const { transaction_id } = req.params
 
-    if (!transaction_id) throw createHttpError(400, 'Missing transaction_id')
+    if (!transaction_id) throw createHttpError(400, "Missing transaction_id")
 
-    const result = await Transaction.findByIdAndUpdate(transaction_id, req.body, { new: true })
+    const result = await Transaction.findByIdAndUpdate(
+      transaction_id,
+      req.body,
+      { new: true }
+    )
     console.log(`Transaction ${transaction_id} updated`)
 
     res.send(result)
-  }
-  
-
-  catch (error) {
+  } catch (error) {
     next(error)
   }
-
 }
 
 exports.delete_transaction = async (req, res, next) => {
-
   try {
     const { transaction_id } = req.params
 
-    if (!transaction_id) throw createHttpError(400, 'Missing transaction_id')
+    if (!transaction_id) throw createHttpError(400, "Missing transaction_id")
 
     const result = await Transaction.findByIdAndDelete(transaction_id)
 
     res.send(result)
-
-  }
-  catch (error) {
+  } catch (error) {
     next(error)
   }
-
-
 }
 
 exports.register_transactions = async (req, res, next) => {
@@ -93,43 +80,37 @@ exports.register_transactions = async (req, res, next) => {
     const { account } = req.params
     const { transactions } = req.body
 
-    if (!transactions) throw createHttpError(400, 'Missing transactions')
+    if (!transactions) throw createHttpError(400, "Missing transactions")
 
     // Create a list of operations
-    const bulk_operations = transactions.map( transaction => ({
+    const bulk_operations = transactions.map((transaction) => ({
       updateOne: {
         filter: { account, ...transaction },
         update: { account, ...transaction },
-        upsert: true
-      }
+        upsert: true,
+      },
     }))
 
-
     const bulkWriteOpResult = await Transaction.bulkWrite(bulk_operations)
-    console.log(`${transactions.length} Transactions registered for account ${account}`)
+    console.log(
+      `${transactions.length} Transactions registered for account ${account}`
+    )
     res.send(bulkWriteOpResult)
-  }
-  catch (error) {
+  } catch (error) {
     next(error)
   }
-
-
-
-
 }
 
-const get_accounts_with_transactions = () => Transaction.find().distinct('account')
+const get_accounts_with_transactions = () =>
+  Transaction.find().distinct("account")
 exports.get_accounts_with_transactions = get_accounts_with_transactions
 
-exports.get_accounts = async (req,res, next) => {
+exports.get_accounts = async (req, res, next) => {
   // Get a list of all accounts
   try {
     const accounts = await get_accounts_with_transactions()
     res.send(accounts)
-  }
-  catch (e) {
+  } catch (e) {
     next(e)
   }
-
-
 }
