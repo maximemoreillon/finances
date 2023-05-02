@@ -47,7 +47,7 @@ spec:
   tls:
     - hosts:
         - ${K8S_INGRESS_HOST}
-      secretName: ${APPLICATION_NAME}
+      secretName: ${APPLICATION_NAME}-tls
   rules:
     - host: ${K8S_INGRESS_HOST}
       http:

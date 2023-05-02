@@ -23,10 +23,11 @@ const {
   IDENTIFICATION_URL,
   AUTHORIZED_GROUPS,
   GROUP_AUTHORIZATION_URL,
+  TZ,
 } = process.env
 
 // Set timezone
-process.env.TZ = process.env.TZ || "Asia/Tokyo"
+process.env.TZ = TZ || "Asia/Tokyo"
 
 mongodb_connect()
 
