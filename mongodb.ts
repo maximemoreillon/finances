@@ -1,6 +1,6 @@
 import mongoose from "mongoose"
 
-const { MONGODB_DB = "finances", MONGODB_URL = "mongodb://mongo:27017" } =
+export const { MONGODB_DB = "finances", MONGODB_URL = "mongodb://mongo:27017" } =
   process.env
 
 export const connect = () =>
@@ -16,7 +16,7 @@ export const connect = () =>
       .connect(connection_url, mongodb_options)
       .then(() => {
         console.log("[Mongoose] Initial connection successful")
-        resolve()
+        resolve("Connected")
       })
       .catch((error) => {
         console.log("[Mongoose] Initial connection failed")
@@ -24,5 +24,3 @@ export const connect = () =>
       })
   })
 
-export const url = MONGODB_URL
-export const db = MONGODB_DB

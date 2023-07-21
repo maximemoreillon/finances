@@ -10,12 +10,12 @@ const agent = new Agent({
   keepAliveMsecs: 20 * 1000, // 20 seconds keep alive
 })
 
-const {
+export const {
   INFLUXDB_URL = "localhost",
   INFLUXDB_TOKEN,
-  INFLUXDB_ORG,
+  INFLUXDB_ORG = "my_org",
   INFLUXDB_BUCKET = "finances",
-  PRECISION = "ns",
+  PRECISION = "ns" as any,
 } = process.env
 
 const influxDb = new InfluxDB({
@@ -32,11 +32,11 @@ export const writeApi = influxDb.getWriteApi(
 export const queryApi = influxDb.getQueryApi(INFLUXDB_ORG)
 export const deleteApi = new DeleteAPI(influxDb)
 
-export const influx_read = (query) =>
+export const influx_read = (query: string) =>
   new Promise((resolve, reject) => {
     // helper function for Influx queries
 
-    const results = []
+    const results: any = []
     queryApi.queryRows(query, {
       next(row, tableMeta) {
         // TODO: Find way to convert directly to an array
@@ -51,8 +51,3 @@ export const influx_read = (query) =>
       },
     })
   })
-
-export const url = INFLUXDB_URL
-export const org = INFLUXDB_ORG
-export const bucket = INFLUXDB_BUCKET
-export const token = INFLUXDB_TOKEN

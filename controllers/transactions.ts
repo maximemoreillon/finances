@@ -1,7 +1,8 @@
 import Transaction from "../models/transaction"
 import createHttpError from "http-errors"
+import { Request, Response } from "express"
 
-export const get_transactions = async (req, res) => {
+export const get_transactions = async (req: Request, res: Response) => {
   // Route to get all transactions of a given account
 
   // Once routing has been cleaned up, only req.params.account should be used
@@ -17,8 +18,8 @@ export const get_transactions = async (req, res) => {
   res.send(transactions)
 }
 
-export const get_transaction = async (req, res) => {
-  // Route to get a single transaction, regardless of account
+export const get_transaction = async (req: Request, res: Response) => {
+  // NOTE: regardless of account
 
   const { transaction_id } = req.params
 
@@ -30,7 +31,7 @@ export const get_transaction = async (req, res) => {
   res.send(transaction)
 }
 
-export const update_transaction = async (req, res) => {
+export const update_transaction = async (req: Request, res: Response) => {
   // Route to update a single transaction, identified using its ID
 
   const { transaction_id } = req.params
@@ -45,7 +46,7 @@ export const update_transaction = async (req, res) => {
   res.send(result)
 }
 
-export const delete_transaction = async (req, res) => {
+export const delete_transaction = async (req: Request, res: Response) => {
   const { transaction_id } = req.params
 
   if (!transaction_id) throw createHttpError(400, "Missing transaction_id")
@@ -55,7 +56,7 @@ export const delete_transaction = async (req, res) => {
   res.send(result)
 }
 
-export const register_transactions = async (req, res) => {
+export const register_transactions = async (req: Request, res: Response) => {
   // Route to register multiple transactions
 
   const { account } = req.params
@@ -64,7 +65,7 @@ export const register_transactions = async (req, res) => {
   if (!transactions) throw createHttpError(400, "Missing transactions")
 
   // Create a list of operations
-  const bulk_operations = transactions.map((transaction) => ({
+  const bulk_operations = transactions.map((transaction: any) => ({
     updateOne: {
       filter: { account, ...transaction },
       update: { account, ...transaction },
@@ -79,11 +80,10 @@ export const register_transactions = async (req, res) => {
   res.send(bulkWriteOpResult)
 }
 
-const get_accounts_with_transactions = () =>
+export const get_accounts_with_transactions = () =>
   Transaction.find().distinct("account")
-export const get_accounts_with_transactions = get_accounts_with_transactions
 
-export const get_accounts = async (req, res) => {
+export const get_accounts = async (req: Request, res: Response) => {
   const accounts = await get_accounts_with_transactions()
   res.send(accounts)
 }

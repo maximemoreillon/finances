@@ -7,14 +7,14 @@ import {
   update_transaction,
   delete_transaction,
 } from "../controllers/transactions"
+import transaction_categories_router from "./transaction_categories"
 
 const router = Router({ mergeParams: true })
 
 router.route("/").get(get_transactions).post(register_transactions)
 
-router.use("/categories", require("./transaction_categories"))
+router.use("/categories", transaction_categories_router)
 
-// Route to get accounts that have transactions
 router.route("/accounts").get(get_accounts)
 
 router

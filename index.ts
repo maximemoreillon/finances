@@ -5,13 +5,17 @@ import auth from "@moreillon/express_identification_middleware"
 import group_auth from "@moreillon/express_group_based_authorization_middleware"
 import {
   connect as mongodb_connect,
-  url as mongodb_url,
-  db as mongodb_db,
-} from "./mongodbs"
-import { url as influxdb_url, db as influxdb_db } from "./influxdb"
+  MONGODB_DB,
+  MONGODB_URL,
+} from "./mongodb"
+import { INFLUXDB_URL, INFLUXDB_BUCKET, INFLUXDB_ORG } from "./influxdb"
 import apiMetrics from "prometheus-api-metrics"
 import dotenv from "dotenv"
 import { version, author } from "./package.json"
+
+import balance_router from './routes/balance'
+import accounts_router from './routes/accounts'
+import transactions_router from './routes/transactions'
 
 dotenv.config()
 
@@ -43,8 +47,8 @@ app.get("/", (req, res) => {
     author,
     version,
     databases: {
-      mongodb: { url: mongodb_url, db: mongodb_db },
-      influxdb: { url: influxdb_url, db: influxdb_db },
+      mongodb: { url: MONGODB_URL, db: MONGODB_DB },
+      influxdb: { url: INFLUXDB_URL, bucket: INFLUXDB_BUCKET, org: INFLUXDB_ORG },
     },
     auth: {
       identification_url: IDENTIFICATION_URL,
@@ -68,11 +72,11 @@ if (AUTHORIZED_GROUPS && GROUP_AUTHORIZATION_URL) {
   app.use(group_auth(group_auth_options))
 }
 
-app.use("/accounts", require("./routes/accounts.js"))
+app.use("/accounts", accounts_router)
 
 // Those are not RESTful
-app.use("/balance", require("./routes/balance.js"))
-app.use("/transactions", require("./routes/transactions.js"))
+app.use("/balance", balance_router)
+app.use("/transactions", transactions_router)
 
 // Start server
 app.listen(APP_PORT, () => {

@@ -1,15 +1,9 @@
 import createHttpError from "http-errors"
 import { Point } from "@influxdata/influxdb-client"
-import {
-  org,
-  bucket,
-  writeApi,
-  influx_read,
-  deleteApi,
-  measurement,
-} from "../influxdb"
+import { INFLUXDB_BUCKET, writeApi, influx_read } from "../influxdb"
+import { Request, Response } from "express"
 
-export const register_balance = async (req, res) => {
+export const register_balance = async (req: Request, res: Response) => {
   // TODO: use params
   const account =
     req.body.account ||
@@ -44,7 +38,7 @@ export const register_balance = async (req, res) => {
   res.send(point)
 }
 
-export const get_balance_history = async (req, res) => {
+export const get_balance_history = async (req: Request, res: Response) => {
   const { account } = req.params
 
   // Filters
@@ -64,7 +58,7 @@ export const get_balance_history = async (req, res) => {
 
   // NOTE: check for risks of injection
   const query = `
-      from(bucket:"${bucket}")
+      from(bucket:"${INFLUXDB_BUCKET}")
       |> range(start: ${start}, ${stop_query})
       |> filter(fn: (r) => r._measurement == "${account}")
       `
@@ -78,21 +72,20 @@ export const get_balance_history = async (req, res) => {
   console.log(`Balance history of account ${account} queried`)
 }
 
-const get_accounts_with_balance = async () => {
+export const get_accounts_with_balance = async () => {
   const query = `
     import \"influxdata/influxdb/schema\"
-    schema.measurements(bucket: \"${bucket}\")
+    schema.measurements(bucket: \"${INFLUXDB_BUCKET}\")
     `
 
   // Run the query
-  const result = await influx_read(query)
+  const result = (await influx_read(query)) as any[]
 
   // Extract measurements from result
-  return result.map((r) => r._value)
+  return result.map((r: any) => r._value)
 }
-export const get_accounts_with_balance = get_accounts_with_balance
 
-export const get_accounts = async (req, res) => {
+export const get_accounts = async (req: Request, res: Response) => {
   const accounts = await get_accounts_with_balance()
   res.send(accounts)
 }
