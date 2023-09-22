@@ -46,16 +46,24 @@ export const get_balance_history = async (req: Request, res: Response) => {
   let {
     start = "0", // by default, query all points
     stop,
+    last,
   } = req.query
 
   const stop_query = stop ? `stop: ${stop}` : ""
 
   // NOTE: check for risks of injection
-  const query = `
-      from(bucket:"${INFLUXDB_BUCKET}")
-      |> range(start: ${start}, ${stop_query})
-      |> filter(fn: (r) => r._measurement == "${account}")
-      `
+  let query = `from(bucket:"${INFLUXDB_BUCKET}")
+      |> range(start: ${start}, ${stop_query})`
+
+  if (account) {
+    query = `${query}
+      |> filter(fn: (r) => r._measurement == "${account}")`
+  }
+
+  if (last) {
+    query = `${query}
+      |> last()`
+  }
 
   // Run the query
   const points = await influx_read(query)

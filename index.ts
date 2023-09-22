@@ -3,19 +3,15 @@ import "express-async-errors"
 import cors from "cors"
 import auth from "@moreillon/express_identification_middleware"
 import group_auth from "@moreillon/express_group_based_authorization_middleware"
-import {
-  connect as mongodb_connect,
-  MONGODB_DB,
-  MONGODB_URL,
-} from "./mongodb"
+import { connect as mongodb_connect, MONGODB_DB, MONGODB_URL } from "./mongodb"
 import { INFLUXDB_URL, INFLUXDB_BUCKET, INFLUXDB_ORG } from "./influxdb"
 import apiMetrics from "prometheus-api-metrics"
 import dotenv from "dotenv"
 import { version, author } from "./package.json"
 
-import balance_router from './routes/balance'
-import accounts_router from './routes/accounts'
-import transactions_router from './routes/transactions'
+import balance_router from "./routes/balance"
+import accounts_router from "./routes/accounts"
+import transactions_router from "./routes/transactions"
 
 dotenv.config()
 
@@ -48,7 +44,11 @@ app.get("/", (req, res) => {
     version,
     databases: {
       mongodb: { url: MONGODB_URL, db: MONGODB_DB },
-      influxdb: { url: INFLUXDB_URL, bucket: INFLUXDB_BUCKET, org: INFLUXDB_ORG },
+      influxdb: {
+        url: INFLUXDB_URL,
+        bucket: INFLUXDB_BUCKET,
+        org: INFLUXDB_ORG,
+      },
     },
     auth: {
       identification_url: IDENTIFICATION_URL,
@@ -61,8 +61,10 @@ app.get("/", (req, res) => {
 })
 
 // Authenticate everything from here
-if (process.env.NODE_ENV !== "development")
+if (IDENTIFICATION_URL) {
+  console.log(`[Auth] Enabling authentication using ${IDENTIFICATION_URL}`)
   app.use(auth({ url: IDENTIFICATION_URL }))
+}
 if (AUTHORIZED_GROUPS && GROUP_AUTHORIZATION_URL) {
   console.log(`[Auth] Enabling group-based authorization`)
   const group_auth_options = {
