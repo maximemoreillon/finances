@@ -12,6 +12,7 @@ import { version, author } from "./package.json"
 import balance_router from "./routes/balance"
 import accounts_router from "./routes/accounts"
 import transactions_router from "./routes/transactions"
+import exchangeRateRouter from "./routes/exchangeRate"
 
 dotenv.config()
 
@@ -79,7 +80,7 @@ app.use("/accounts", accounts_router)
 // Those are not RESTful
 app.use("/balance", balance_router)
 app.use("/transactions", transactions_router)
-
+app.use("/rate", exchangeRateRouter)
 // Start server
 app.listen(APP_PORT, () => {
   console.log(`[Express] Finances API listening on *:${APP_PORT}`)
