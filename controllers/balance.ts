@@ -46,15 +46,9 @@ export const get_balance_history = async (req: Request, res: Response) => {
   let {
     start = "0", // by default, query all points
     stop,
-    tags = [],
-    fields = [],
   } = req.query
 
   const stop_query = stop ? `stop: ${stop}` : ""
-
-  // If only one tag provided, will be parsed as string so put it in an array
-  if (typeof tags === "string") tags = [tags]
-  if (typeof fields === "string") fields = [fields]
 
   // NOTE: check for risks of injection
   const query = `
