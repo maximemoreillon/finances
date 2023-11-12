@@ -5,7 +5,7 @@ import auth from "@moreillon/express_identification_middleware"
 import group_auth from "@moreillon/express_group_based_authorization_middleware"
 import { connect as mongodb_connect, MONGODB_DB, MONGODB_URL } from "./mongodb"
 import { INFLUXDB_URL, INFLUXDB_BUCKET, INFLUXDB_ORG } from "./influxdb"
-import apiMetrics from "prometheus-api-metrics"
+import promBundle from "express-prom-bundle"
 import dotenv from "dotenv"
 import { version, author } from "./package.json"
 
@@ -28,6 +28,7 @@ const {
 
 // Set timezone
 process.env.TZ = TZ || "Asia/Tokyo"
+const promOptions = { includeMethod: true, includePath: true }
 
 mongodb_connect()
 
@@ -36,7 +37,7 @@ const app = express()
 // Express configuration
 app.use(express.json())
 app.use(cors())
-app.use(apiMetrics())
+app.use(promBundle(promOptions))
 
 app.get("/", (req, res) => {
   res.send({
