@@ -1,5 +1,5 @@
 stages:
-  - containerization
+  - build
   - deploy
 
 variables:
@@ -10,27 +10,21 @@ variables:
 
 image: moreillon/ci-dind
 services:
-  - name: docker:19.03.12-dind
+  - name: docker:24.0.7-dind
 
-containerization:
+build:
   only:
     - master
-  stage: containerization
+  stage: build
   tags:
     - dind
   before_script:
     - echo "${DOCKER_HUB_PASSWORD}" | docker login --username ${DOCKER_HUB_USERNAME} --password-stdin
   script:
-    # Building
     - docker build -t ${CONTAINER_IMAGE} .
-    # Tagging
     - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_TAGGED}
-    # Pushing
     - docker push ${CONTAINER_IMAGE}
     - docker push ${CONTAINER_IMAGE_TAGGED}
-    # cleanup
-    - docker image rm ${CONTAINER_IMAGE}
-    - docker image rm ${CONTAINER_IMAGE_TAGGED}
 
 deploy:
   only:
