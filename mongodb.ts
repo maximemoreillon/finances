@@ -1,19 +1,40 @@
 import mongoose from "mongoose"
 
-export const { MONGODB_DB = "finances", MONGODB_URL = "mongodb://mongo:27017" } =
-  process.env
+export const {
+  MONGODB_CONNECTION_STRING,
+  MONGODB_PROTOCOL = "mongodb",
+  MONGODB_USERNAME,
+  MONGODB_PASSWORD,
+  MONGODB_HOST = "localhost",
+  MONGODB_PORT,
+  MONGODB_DB = "food_manager",
+  MONGODB_OPTIONS = "",
+} = process.env
+
+const mongodbPort = MONGODB_PORT ? `:${MONGODB_PORT}` : ""
+
+const connectionString =
+  MONGODB_CONNECTION_STRING ||
+  (MONGODB_USERNAME && MONGODB_PASSWORD
+    ? `${MONGODB_PROTOCOL}://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_HOST}${mongodbPort}/${MONGODB_DB}${MONGODB_OPTIONS}`
+    : `${MONGODB_PROTOCOL}://${MONGODB_HOST}${mongodbPort}/${MONGODB_DB}${MONGODB_OPTIONS}`)
+
+export const redactedConnectionString = connectionString.replace(
+  /:.*@/,
+  "://***:***@"
+)
 
 export const connect = () =>
   new Promise((resolve) => {
+    console.log(`[Mongoose] Connecting to ${redactedConnectionString}`)
+
     const mongodb_options = {
       useUnifiedTopology: true,
       useNewUrlParser: true,
     }
 
-    const connection_url = `${MONGODB_URL}/${MONGODB_DB}`
-
     mongoose
-      .connect(connection_url, mongodb_options)
+      .connect(connectionString, mongodb_options)
       .then(() => {
         console.log("[Mongoose] Initial connection successful")
         resolve("Connected")
@@ -23,4 +44,3 @@ export const connect = () =>
         setTimeout(connect, 5000)
       })
   })
-

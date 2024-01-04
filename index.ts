@@ -3,7 +3,10 @@ import "express-async-errors"
 import cors from "cors"
 import auth from "@moreillon/express_identification_middleware"
 import group_auth from "@moreillon/express_group_based_authorization_middleware"
-import { connect as mongodb_connect, MONGODB_DB, MONGODB_URL } from "./mongodb"
+import {
+  connect as mongodb_connect,
+  redactedConnectionString as mongodbConnectionString,
+} from "./mongodb"
 import { INFLUXDB_URL, INFLUXDB_BUCKET, INFLUXDB_ORG } from "./influxdb"
 import promBundle from "express-prom-bundle"
 import dotenv from "dotenv"
@@ -45,7 +48,7 @@ app.get("/", (req, res) => {
     author,
     version,
     databases: {
-      mongodb: { url: MONGODB_URL, db: MONGODB_DB },
+      mongodb: { connection_string: mongodbConnectionString },
       influxdb: {
         url: INFLUXDB_URL,
         bucket: INFLUXDB_BUCKET,
