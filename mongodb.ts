@@ -7,7 +7,7 @@ export const {
   MONGODB_PASSWORD,
   MONGODB_HOST = "localhost",
   MONGODB_PORT,
-  MONGODB_DB = "food_manager",
+  MONGODB_DB = "finances",
   MONGODB_OPTIONS = "",
 } = process.env
 
