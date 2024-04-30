@@ -1,3 +1,9 @@
+import dotenv from "dotenv"
+dotenv.config()
+
+import { version, author } from "./package.json"
+console.log(`Finances manager v${version}`)
+
 import express from "express"
 import "express-async-errors"
 import cors from "cors"
@@ -9,17 +15,11 @@ import {
 } from "./mongodb"
 import { INFLUXDB_URL, INFLUXDB_BUCKET, INFLUXDB_ORG } from "./influxdb"
 import promBundle from "express-prom-bundle"
-import dotenv from "dotenv"
-import { version, author } from "./package.json"
 
 import balance_router from "./routes/balance"
 import accounts_router from "./routes/accounts"
 import transactions_router from "./routes/transactions"
 import exchangeRateRouter from "./routes/exchangeRate"
-
-dotenv.config()
-
-console.log(`Finances manager v${version}`)
 
 const {
   APP_PORT = 80,

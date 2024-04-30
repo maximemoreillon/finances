@@ -1,9 +1,6 @@
-import dotenv from "dotenv"
 import { InfluxDB } from "@influxdata/influxdb-client"
 import { DeleteAPI } from "@influxdata/influxdb-client-apis"
 import { Agent } from "http"
-
-dotenv.config()
 
 const agent = new Agent({
   keepAlive: true,
