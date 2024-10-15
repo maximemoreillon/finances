@@ -1,8 +1,9 @@
 import { client } from "./client"
 
 const {
-  LEGACY_FINANCES_API_URL = "http://localhost",
-  LEGACY_FINANCES_ACCOUNT = "",
+  IMPORT_FINANCES_API_URL = "http://localhost",
+  IMPORT_ORIGIN_ACCOUNT = "myaccount",
+  IMPORT_TARGET_ACCOUNT = "1",
   OIDC_CLIENT_ID,
   OIDC_CLIENT_SECRET,
   OIDC_TOKEN_URL = "http://localhost",
@@ -31,7 +32,7 @@ async function getAccessToken() {
 
 async function fetchBalance(access_token: string) {
   const res = await fetch(
-    `${LEGACY_FINANCES_API_URL}/accounts/${LEGACY_FINANCES_ACCOUNT}/balance`,
+    `${IMPORT_FINANCES_API_URL}/accounts/${IMPORT_ORIGIN_ACCOUNT}/balance`,
     { headers: { Authorization: `Bearer ${access_token}` } }
   )
   const data = await res.json()
@@ -45,9 +46,9 @@ async function importBalance(access_token: string) {
       const { _time, _value } = record
       await client.query(
         `INSERT INTO balance(account_id, time, balance) 
-        VALUES(4, $1, $2)
+        VALUES($1, $2, $3)
         ON CONFLICT DO NOTHING`,
-        [_time, _value]
+        [Number(IMPORT_TARGET_ACCOUNT), _time, _value]
       )
       console.log({ _time, _value })
     }
@@ -58,7 +59,7 @@ async function importBalance(access_token: string) {
 
 async function fetchTransactions(access_token: string) {
   const res = await fetch(
-    `${LEGACY_FINANCES_API_URL}/accounts/${LEGACY_FINANCES_ACCOUNT}/transactions`,
+    `${IMPORT_FINANCES_API_URL}/accounts/${IMPORT_ORIGIN_ACCOUNT}/transactions`,
     { headers: { Authorization: `Bearer ${access_token}` } }
   )
   const data = await res.json()
@@ -71,8 +72,8 @@ async function getKeywords() {
   return rows
 }
 
+// TODO: use utils?
 async function importTransactions(accessToken: string) {
-  const account_id = 4
   const transactions = await fetchTransactions(accessToken)
 
   // TODO: get category keywords
@@ -88,7 +89,7 @@ async function importTransactions(accessToken: string) {
         ON CONFLICT DO NOTHING
         RETURNING *
         `,
-        [account_id, date, amount, description]
+        [Number(IMPORT_TARGET_ACCOUNT), date, amount, description]
       )
 
       if (newTransaction) {
@@ -113,7 +114,7 @@ async function importTransactions(accessToken: string) {
 
 async function fetchCategories(access_token: string) {
   const res = await fetch(
-    `${LEGACY_FINANCES_API_URL}/transactions/categories`,
+    `${IMPORT_FINANCES_API_URL}/transactions/categories`,
     { headers: { Authorization: `Bearer ${access_token}` } }
   )
   const data = await res.json()
@@ -167,7 +168,7 @@ async function main() {
   }
   client.connect()
 
-  await importCategories(accessToken)
+  // await importCategories(accessToken)
   await importTransactions(accessToken)
 
   // await importBalance(accessToken)

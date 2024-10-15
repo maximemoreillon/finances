@@ -27,7 +27,10 @@ export const readAccounts = async (req: Request, res: Response) => {
 
 export const readAccount = async (req: Request, res: Response) => {
   const { account_id } = req.params
-  const sql = "SELECT * FROM account WHERE id=$1"
+  const sql = `
+    SELECT * 
+    FROM account WHERE id=$1
+    `
   const {
     rows: [account],
   } = await pool.query(sql, [account_id])

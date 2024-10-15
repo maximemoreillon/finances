@@ -3,10 +3,12 @@ import { Request, Response } from "express"
 import { pool } from "../db"
 import { addCategoriesToTransaction } from "../utils"
 
-export const register_transactions = async (req: Request, res: Response) => {
-  const { account_id } = req.params
-  const { time = new Date(), amount, description } = req.body
-
+async function registerSingleTransaction({
+  time,
+  account_id,
+  amount,
+  description,
+}: any) {
   if (!account_id) throw createHttpError(400, `Missing account id`)
   if (!amount) throw createHttpError(400, `Missing amount`)
   if (!description) throw createHttpError(400, `Missing description`)
@@ -15,14 +17,29 @@ export const register_transactions = async (req: Request, res: Response) => {
     rows: [newTransaction],
   } = await pool.query(
     `
-    INSERT INTO transaction(account_id, time, amount, description) 
-    VALUES($1, $2, $3, $4) 
-    RETURNING *
-    `,
+      INSERT INTO transaction(account_id, time, amount, description) 
+      VALUES($1, $2, $3, $4)
+      ON CONFLICT DO NOTHING
+      RETURNING *
+      `,
     [account_id, time, amount, description]
   )
 
-  await addCategoriesToTransaction(newTransaction)
+  if (newTransaction) await addCategoriesToTransaction(newTransaction)
+
+  return newTransaction
+}
+
+export const register_transactions = async (req: Request, res: Response) => {
+  const { account_id } = req.params
+  const { time = new Date(), amount, description } = req.body
+
+  const newTransaction = await registerSingleTransaction({
+    account_id,
+    time,
+    amount,
+    description,
+  })
 
   res.send(newTransaction)
 }
