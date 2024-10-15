@@ -1,14 +1,8 @@
 import { Router } from "express"
-import {
-  get_balance_history,
-  get_accounts,
-  register_balance,
-} from "../controllers/balance"
+import { readBalance, registerBalance } from "../controllers/balance"
 
 const router = Router({ mergeParams: true })
 
-router.route("/").get(get_balance_history).post(register_balance)
-
-router.route("/accounts").get(get_accounts)
+router.route("/").get(readBalance).post(registerBalance)
 
 export default router

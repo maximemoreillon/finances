@@ -1,0 +1,5 @@
+- [ ] Categories in GET /account/:accountId/transactions
+- [x] Cascade
+- [ ] Bulk insert
+- [x] Transactions reverse order
+- [ ] Start Stop queries from front-end

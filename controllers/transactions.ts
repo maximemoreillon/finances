@@ -1,89 +1,102 @@
-import Transaction from "../models/transaction"
 import createHttpError from "http-errors"
 import { Request, Response } from "express"
+import { pool } from "../db"
+import { addCategoriesToTransaction } from "../utils"
 
-export const get_transactions = async (req: Request, res: Response) => {
-  // Route to get all transactions of a given account
+export const register_transactions = async (req: Request, res: Response) => {
+  const { account_id } = req.params
+  const { time = new Date(), amount, description } = req.body
 
-  // Once routing has been cleaned up, only req.params.account should be used
+  if (!account_id) throw createHttpError(400, `Missing account id`)
+  if (!amount) throw createHttpError(400, `Missing amount`)
+  if (!description) throw createHttpError(400, `Missing description`)
 
-  const { account } = req.params
-  if (!account) throw createHttpError(400, "Missing acount")
+  const {
+    rows: [newTransaction],
+  } = await pool.query(
+    `
+    INSERT INTO transaction(account_id, time, amount, description) 
+    VALUES($1, $2, $3, $4) 
+    RETURNING *
+    `,
+    [account_id, time, amount, description]
+  )
 
-  const transactions = await Transaction.find({ account })
-    .sort({ date: -1 })
-    .populate("category")
+  await addCategoriesToTransaction(newTransaction)
 
-  console.log(`Transactions of account ${account} queried`)
-  res.send(transactions)
+  res.send(newTransaction)
+}
+export const readTransactions = async (req: Request, res: Response) => {
+  const { account_id } = req.params
+
+  const {
+    // 12 months ago by default
+    from = new Date(new Date().setMonth((new Date().getMonth() - 12) % 12)),
+    to = new Date(),
+    limit = "1000",
+  } = req.query
+
+  const { rows: transactions } = await pool.query(
+    `
+    SELECT * FROM transaction 
+    WHERE account_id=$1
+      AND time > $2
+      AND time < $3
+    ORDER BY time DESC
+    LIMIT $4
+    `,
+    [account_id, from, to, limit]
+  )
+
+  // Querying categories
+  // TODO: try to achieve in a single SQL query
+  const { rows: keywords } = await pool.query(
+    `
+    SELECT word, name AS categoryname, category.id as categoryid
+    FROM keyword
+    INNER JOIN category ON category.id = keyword.category_id
+    `,
+    []
+  )
+
+  const records = transactions.map((t) => ({
+    ...t,
+    categories: keywords
+      .filter((k) => t.description.includes(k.word))
+      .map((k) => ({ id: k.categoryid, name: k.categoryname })),
+  }))
+
+  res.send({ from, to, limit: Number(limit), records })
 }
 
-export const get_transaction = async (req: Request, res: Response) => {
-  // NOTE: regardless of account
-
+export const readTransaction = async (req: Request, res: Response) => {
   const { transaction_id } = req.params
+  if (!transaction_id) throw createHttpError(400, `Missing transaction id`)
+  const {
+    rows: [transaction],
+  } = await pool.query("SELECT * FROM transaction WHERE id=$1", [
+    transaction_id,
+  ])
 
-  if (!transaction_id) throw createHttpError(400, "Missing transaction_id")
-
-  const transaction = await Transaction.findById(transaction_id)
-  console.log(`Transaction ${transaction_id} queried`)
-
-  res.send(transaction)
+  const { rows: categories } = await pool.query(
+    `SELECT category.name, category.id FROM transaction_category 
+    INNER JOIN category ON transaction_category.category_id=category.id
+    WHERE transaction_id=$1
+      `,
+    [transaction_id]
+  )
+  res.send({ ...transaction, categories })
 }
 
 export const update_transaction = async (req: Request, res: Response) => {
-  // Route to update a single transaction, identified using its ID
-
-  const { transaction_id } = req.params
-
-  if (!transaction_id) throw createHttpError(400, "Missing transaction_id")
-
-  const result = await Transaction.findByIdAndUpdate(transaction_id, req.body, {
-    new: true,
-  })
-  console.log(`Transaction ${transaction_id} updated`)
-
-  res.send(result)
+  res.status(500).send("WIP")
 }
 
 export const delete_transaction = async (req: Request, res: Response) => {
   const { transaction_id } = req.params
+  if (!transaction_id) throw createHttpError(400, `Missing transaction id`)
+  const sql = "DELETE FROM transaction WHERE id=$1"
+  await pool.query(sql, [transaction_id])
 
-  if (!transaction_id) throw createHttpError(400, "Missing transaction_id")
-
-  const result = await Transaction.findByIdAndDelete(transaction_id)
-
-  res.send(result)
-}
-
-export const register_transactions = async (req: Request, res: Response) => {
-  // Route to register multiple transactions
-
-  const { account } = req.params
-  const { transactions } = req.body
-
-  if (!transactions) throw createHttpError(400, "Missing transactions")
-
-  // Create a list of operations
-  const bulk_operations = transactions.map((transaction: any) => ({
-    updateOne: {
-      filter: { account, ...transaction },
-      update: { account, ...transaction },
-      upsert: true,
-    },
-  }))
-
-  const bulkWriteOpResult = await Transaction.bulkWrite(bulk_operations)
-  console.log(
-    `${transactions.length} Transactions registered for account ${account}`
-  )
-  res.send(bulkWriteOpResult)
-}
-
-export const get_accounts_with_transactions = () =>
-  Transaction.find().distinct("account")
-
-export const get_accounts = async (req: Request, res: Response) => {
-  const accounts = await get_accounts_with_transactions()
-  res.send(accounts)
+  res.send({ id: transaction_id })
 }
