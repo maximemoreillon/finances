@@ -34,10 +34,11 @@ export const readBalance = async (req: Request, res: Response) => {
   const sql = `
     SELECT * FROM balance 
     WHERE account_id=$1
-      AND time > $2
-      AND time < $3
+      AND time BETWEEN $2 AND $3
     LIMIT $4
     `
   const { rows } = await pool.query(sql, [account_id, from, to, Number(limit)])
   res.send({ from, to, limit: Number(limit), records: rows })
 }
+
+// TODO: Delete balance

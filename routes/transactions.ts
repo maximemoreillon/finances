@@ -1,6 +1,6 @@
 import { Router } from "express"
 import {
-  register_transactions,
+  registerTransaction,
   readTransaction,
   readTransactions,
   update_transaction,
@@ -14,14 +14,11 @@ import {
 
 const router = Router({ mergeParams: true })
 
-router.route("/").get(readTransactions).post(register_transactions)
+router.route("/").get(readTransactions).post(registerTransaction)
 
-router
-  .route("/:transaction_id")
-  .get(readTransaction)
-  .delete(delete_transaction)
-  .patch(update_transaction)
-  .put(update_transaction)
+router.route("/:transaction_id").get(readTransaction).delete(delete_transaction)
+// .patch(update_transaction)
+// .put(update_transaction)
 
 router
   .route("/:transaction_id/categories")

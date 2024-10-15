@@ -3,7 +3,8 @@ import { Request, Response } from "express"
 import { pool } from "../db"
 import { addCategoriesToTransaction } from "../utils"
 
-async function registerSingleTransaction({
+// Exported so as to be used in tools/dataImport.ts
+export async function registerSingleTransaction({
   time,
   account_id,
   amount,
@@ -30,7 +31,7 @@ async function registerSingleTransaction({
   return newTransaction
 }
 
-export const register_transactions = async (req: Request, res: Response) => {
+export const registerTransaction = async (req: Request, res: Response) => {
   const { account_id } = req.params
   const { time = new Date(), amount, description } = req.body
 
@@ -53,12 +54,13 @@ export const readTransactions = async (req: Request, res: Response) => {
     limit = "1000",
   } = req.query
 
+  // TODO: have account_id optional, if not provided then all accounts
+  // In that case, add account name to transactions
   const { rows: transactions } = await pool.query(
     `
     SELECT * FROM transaction 
     WHERE account_id=$1
-      AND time > $2
-      AND time < $3
+      AND time BETWEEN $2 AND $3
     ORDER BY time DESC
     LIMIT $4
     `,

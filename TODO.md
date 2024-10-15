@@ -1,5 +1,9 @@
-- [ ] Categories in GET /account/:accountId/transactions
+- [x] Categories in GET /account/:accountId/transactions
 - [x] Cascade
-- [ ] Bulk insert
+- [ ] ~~Bulk insert~~
 - [x] Transactions reverse order
-- [ ] Start Stop queries from front-end
+- [x] Start Stop queries from front-end
+- [ ] PUT /keywords/:keyword_id
+- [ ] PUT /transactions/:transaction_id
+- [ ] Type definition for objects
+- [ ] GET /transactions independent of account

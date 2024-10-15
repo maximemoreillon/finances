@@ -34,7 +34,6 @@ export const removeCategoryFromtransaction = async (
   res: Response
 ) => {
   const { transaction_id, category_id } = req.params
-  if (!category_id) throw createHttpError(400, `Missing category_id`)
   const sql = `
     DELETE FROM transaction_category 
     WHERE transaction_id=$1 AND category_id=$2`

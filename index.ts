@@ -26,7 +26,6 @@ const {
   TZ,
 } = process.env
 
-// Set timezone
 process.env.TZ = TZ || "Asia/Tokyo"
 const promOptions = { includeMethod: true, includePath: true }
 
@@ -36,7 +35,6 @@ pool.connect().then(() => {
 
 const app = express()
 
-// Express configuration
 app.use(express.json())
 app.use(cors())
 app.use(promBundle(promOptions))
@@ -79,7 +77,7 @@ if (AUTHORIZED_GROUPS && GROUP_AUTHORIZATION_URL) {
 app.use("/accounts", accountsRouter)
 app.use("/rate", exchangeRateRouter)
 app.use("/categories", categoriesRouter)
-// Start server
+
 app.listen(APP_PORT, () => {
   console.log(`[Express] Finances API listening on *:${APP_PORT}`)
 })

@@ -10,20 +10,20 @@ export const createCategory = async (req: Request, res: Response) => {
   const sql = `INSERT INTO category(name) VALUES($1) RETURNING *`
 
   const {
-    rows: [account],
+    rows: [category],
   } = await pool.query(sql, [name])
 
-  res.send(account)
+  res.send(category)
 }
 
 export const readCategories = async (req: Request, res: Response) => {
-  // TODO: achieve this with only SQL
-
   const { rows } = await pool.query(`SELECT * FROM category`)
+
+  // Adding keywords
+  // TODO: achieve this with a single SQL query
   const { rows: keywords } = await pool.query(
     `SELECT word, category_id FROM keyword`
   )
-
   const categories = rows.map((c) => ({
     ...c,
     keywords: keywords.filter((k) => k.category_id === c.id).map((k) => k.word),
@@ -48,7 +48,23 @@ export const readCategory = async (req: Request, res: Response) => {
 }
 
 export const updateCategory = async (req: Request, res: Response) => {
-  res.status(500).send("WIP")
+  const { category_id } = req.params
+  const { name } = req.body
+
+  if (!name) throw createHttpError(400, `Missing name`)
+
+  // TODO: Generic version
+  const sql = `
+    UPDATE category
+    SET name=$2
+    WHERE id=$1
+    RETURNING *`
+
+  const {
+    rows: [category],
+  } = await pool.query(sql, [category_id, name])
+
+  res.send(category)
 }
 
 export const deleteCategory = async (req: Request, res: Response) => {

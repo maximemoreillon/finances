@@ -26,6 +26,8 @@ export const readCategoryKeywords = async (req: Request, res: Response) => {
   res.send({ keywords: rows })
 }
 
+// TODO: Update keyword
+
 export const deleteKeyword = async (req: Request, res: Response) => {
   const { keyword_id } = req.params
   const sql = "DELETE FROM keyword WHERE id=$1"
