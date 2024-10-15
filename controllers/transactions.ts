@@ -42,7 +42,9 @@ export const registerTransaction = async (req: Request, res: Response) => {
     description,
   })
 
-  res.send(newTransaction)
+  if (newTransaction) res.send(newTransaction)
+  // TODO: find better way
+  else res.send({ account_id, time, amount, description })
 }
 export const readTransactions = async (req: Request, res: Response) => {
   const { account_id } = req.params
