@@ -52,6 +52,8 @@ export const readTransactions = async (req: Request, res: Response) => {
   // TODO: from and to optional
   const {
     // 12 months ago by default
+    from = new Date(new Date().setMonth((new Date().getMonth() - 12) % 12)),
+    to = new Date(),
     limit = "500",
   } = req.query
 
@@ -61,10 +63,12 @@ export const readTransactions = async (req: Request, res: Response) => {
   const { rows: transactions } = await pool.query(
     `
     SELECT * FROM transaction 
+    WHERE account_id=$1
+      AND time BETWEEN $2 AND $3
     ORDER BY time DESC
     LIMIT $4
     `,
-    [account_id, limit]
+    [account_id, from, to, limit]
   )
 
   // Querying categories
