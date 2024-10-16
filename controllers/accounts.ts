@@ -9,7 +9,10 @@ export const createAccount = async (req: Request, res: Response) => {
   if (!name) throw createHttpError(400, `Missing name`)
   if (!currency) throw createHttpError(400, `Missing currency`)
 
-  const sql = `INSERT INTO account(name, currency) VALUES($1, $2) RETURNING *`
+  const sql = `
+    INSERT INTO account(name, currency) 
+    VALUES($1, $2) 
+    RETURNING *`
 
   const {
     rows: [account],

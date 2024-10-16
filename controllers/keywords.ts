@@ -8,7 +8,10 @@ export const createKeyword = async (req: Request, res: Response) => {
 
   if (!word) throw createHttpError(400, `Missing word`)
 
-  const sql = `INSERT INTO keyword(category_id, word) VALUES($1, $2) RETURNING *`
+  const sql = `
+    INSERT INTO keyword(category_id, word) 
+    VALUES($1, $2) 
+    RETURNING *`
 
   const {
     rows: [keyword],

@@ -1,4 +1,4 @@
-import { client } from "./client"
+import { pool } from "../db"
 
 const {
   IMPORT_FINANCES_API_URL = "http://localhost",
@@ -44,7 +44,7 @@ async function importBalance(access_token: string) {
   try {
     for (const record of records) {
       const { _time, _value } = record
-      await client.query(
+      await pool.query(
         `INSERT INTO balance(account_id, time, balance) 
         VALUES($1, $2, $3)
         ON CONFLICT DO NOTHING`,
@@ -68,7 +68,7 @@ async function fetchTransactions(access_token: string) {
 
 async function getKeywords() {
   const sql = "SELECT * FROM keyword"
-  const { rows } = await client.query(sql, [])
+  const { rows } = await pool.query(sql, [])
   return rows
 }
 
@@ -83,7 +83,7 @@ async function importTransactions(accessToken: string) {
     for (const { date, amount, description } of transactions) {
       const {
         rows: [newTransaction],
-      } = await client.query(
+      } = await pool.query(
         `INSERT INTO transaction(account_id, time, amount, description)
         VALUES($1, $2, $3, $4)
         ON CONFLICT DO NOTHING
@@ -98,7 +98,7 @@ async function importTransactions(accessToken: string) {
         )
 
         for (const keyword of matchingKeywords) {
-          await client.query(
+          await pool.query(
             `INSERT INTO transaction_category(transaction_id, category_id)
             VALUES($1, $2)`,
             [newTransaction.id, keyword.category_id]
@@ -130,7 +130,7 @@ async function importCategories(access_token: string) {
 
       const {
         rows: [{ id }],
-      } = await client.query(
+      } = await pool.query(
         `INSERT INTO category(name)
         VALUES($1)
         RETURNING *`,
@@ -138,7 +138,7 @@ async function importCategories(access_token: string) {
       )
 
       for (const keyword of keywords) {
-        await client.query(
+        await pool.query(
           `INSERT INTO keyword(category_id, word)
           VALUES($1, $2)
           RETURNING *`,
@@ -166,14 +166,14 @@ async function main() {
   if (!accessToken) {
     throw new Error("Access token not available")
   }
-  client.connect()
+  pool.connect()
 
   // await importCategories(accessToken)
   await importTransactions(accessToken)
 
   // await importBalance(accessToken)
 
-  client.end()
+  pool.end()
 }
 
 main()

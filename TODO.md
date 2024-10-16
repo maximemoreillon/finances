@@ -7,4 +7,5 @@
 - [ ] PUT /transactions/:transaction_id
 - [ ] Type definition for objects
 - [ ] GET /transactions independent of account
-- [ ] Dedicated K8s secret
+- [ ] K8s secret entries for TimescaleDB
+- [ ] Transactions either paginated or queried by date

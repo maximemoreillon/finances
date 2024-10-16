@@ -7,7 +7,10 @@ export const createCategory = async (req: Request, res: Response) => {
 
   if (!name) throw createHttpError(400, `Missing name`)
 
-  const sql = `INSERT INTO category(name) VALUES($1) RETURNING *`
+  const sql = `
+    INSERT INTO category(name) 
+    VALUES($1) 
+    RETURNING *`
 
   const {
     rows: [category],

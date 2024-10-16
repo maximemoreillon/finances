@@ -49,24 +49,22 @@ export const registerTransaction = async (req: Request, res: Response) => {
 export const readTransactions = async (req: Request, res: Response) => {
   const { account_id } = req.params
 
+  // TODO: from and to optional
   const {
     // 12 months ago by default
-    from = new Date(new Date().setMonth((new Date().getMonth() - 12) % 12)),
-    to = new Date(),
-    limit = "1000",
+    limit = "500",
   } = req.query
 
+  // TODO: from and to optional
   // TODO: have account_id optional, if not provided then all accounts
   // In that case, add account name to transactions
   const { rows: transactions } = await pool.query(
     `
     SELECT * FROM transaction 
-    WHERE account_id=$1
-      AND time BETWEEN $2 AND $3
     ORDER BY time DESC
     LIMIT $4
     `,
-    [account_id, from, to, limit]
+    [account_id, limit]
   )
 
   // Querying categories
@@ -87,7 +85,7 @@ export const readTransactions = async (req: Request, res: Response) => {
       .map((k) => ({ id: k.categoryid, name: k.categoryname })),
   }))
 
-  res.send({ from, to, limit: Number(limit), records })
+  res.send({ limit: Number(limit), records })
 }
 
 export const readTransaction = async (req: Request, res: Response) => {
