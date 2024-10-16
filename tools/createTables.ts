@@ -4,6 +4,7 @@ async function main() {
   pool.connect()
 
   try {
+    console.log(`Creating table account`)
     await pool.query(`CREATE TABLE IF NOT EXISTS account (
       id SERIAL PRIMARY KEY,
       currency VARCHAR(50),
@@ -12,22 +13,24 @@ async function main() {
 
     // Transactions
     // NOTE: Not hypertable
+    console.log(`Creating table transaction`)
     await pool.query(`CREATE TABLE IF NOT EXISTS transaction (
       time TIMESTAMPTZ NOT NULL,
       id SERIAL PRIMARY KEY,
       account_id INTEGER,
       description VARCHAR(50),
       amount DOUBLE PRECISION,
-      FOREIGN KEY (account_id) REFERENCES account (id),
+      FOREIGN KEY (account_id) REFERENCES account (id) ON DELETE CASCADE,
       UNIQUE(time, description, amount, account_id)
     );`)
 
     // Balance hypertable
+    console.log(`Creating table balance`)
     await pool.query(`CREATE TABLE IF NOT EXISTS balance (
       time TIMESTAMPTZ NOT NULL,
       account_id INTEGER,
       balance DOUBLE PRECISION,
-      FOREIGN KEY (account_id) REFERENCES account (id)
+      FOREIGN KEY (account_id) REFERENCES account (id) ON DELETE CASCADE
       );`)
 
     try {
@@ -37,11 +40,14 @@ async function main() {
     }
 
     // Transaction categories
+    console.log(`Creating table category`)
     await pool.query(`CREATE TABLE IF NOT EXISTS category (
       id SERIAL PRIMARY KEY,
-      name VARCHAR(50)
+      name VARCHAR(50),
+      UNIQUE(name)
       );`)
 
+    console.log(`Creating table transaction_category`)
     await pool.query(`CREATE TABLE IF NOT EXISTS transaction_category (
       id SERIAL PRIMARY KEY,
       transaction_id INTEGER,
@@ -54,6 +60,7 @@ async function main() {
 
       );`)
 
+    console.log(`Creating table keyword`)
     await pool.query(`CREATE TABLE IF NOT EXISTS keyword (
       id SERIAL PRIMARY KEY,
       word VARCHAR(50),

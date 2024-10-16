@@ -100,7 +100,8 @@ async function importTransactions(accessToken: string) {
         for (const keyword of matchingKeywords) {
           await pool.query(
             `INSERT INTO transaction_category(transaction_id, category_id)
-            VALUES($1, $2)`,
+            VALUES($1, $2)
+            ON CONFLICT DO NOTHING`,
             [newTransaction.id, keyword.category_id]
           )
         }
@@ -112,41 +113,39 @@ async function importTransactions(accessToken: string) {
   }
 }
 
-async function fetchCategories(access_token: string) {
+async function importCategories(access_token: string) {
   const res = await fetch(
     `${IMPORT_FINANCES_API_URL}/transactions/categories`,
     { headers: { Authorization: `Bearer ${access_token}` } }
   )
-  const data = await res.json()
-  return data
-}
-
-async function importCategories(access_token: string) {
-  const records = await fetchCategories(access_token)
+  const records = await res.json()
 
   try {
     for (const record of records) {
       const { label, keywords } = record
 
       const {
-        rows: [{ id }],
+        rows: [category],
       } = await pool.query(
         `INSERT INTO category(name)
         VALUES($1)
+        ON CONFLICT DO NOTHING
         RETURNING *`,
         [label]
       )
 
-      for (const keyword of keywords) {
-        await pool.query(
-          `INSERT INTO keyword(category_id, word)
-          VALUES($1, $2)
-          RETURNING *`,
-          [id, keyword]
-        )
+      if (category) {
+        const { id } = category
+        for (const keyword of keywords) {
+          await pool.query(
+            `INSERT INTO keyword(category_id, word)
+            VALUES($1, $2)
+            RETURNING *`,
+            [id, keyword]
+          )
+        }
+        console.log(label)
       }
-
-      console.log(label)
     }
   } catch (error) {
     console.error(error)
@@ -169,10 +168,10 @@ async function main() {
   pool.connect()
 
   // await importCategories(accessToken)
-  await importTransactions(accessToken)
+  // await importTransactions(accessToken)
+  await importBalance(accessToken)
 
-  // await importBalance(accessToken)
-
+  console.log("Finished")
   pool.end()
 }
 

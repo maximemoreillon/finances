@@ -49,7 +49,7 @@ export const registerTransaction = async (req: Request, res: Response) => {
 export const readTransactions = async (req: Request, res: Response) => {
   const { account_id } = req.params
 
-  const { from = new Date(0), to = new Date(), limit = "500" } = req.query
+  const { from = new Date(0), to = new Date(), limit = "10000" } = req.query
 
   // TODO: have account_id optional, if not provided then all accounts
   // In that case, add account name to transactions

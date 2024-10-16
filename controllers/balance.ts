@@ -24,12 +24,13 @@ export const readBalance = async (req: Request, res: Response) => {
   const { account_id } = req.params
   if (!account_id) throw createHttpError(400, `Missing account id`)
 
-  const { from = new Date(0), to = new Date(), limit = "1000" } = req.query
+  const { from = new Date(0), to = new Date(), limit = "5000" } = req.query
 
   const sql = `
     SELECT * FROM balance 
     WHERE account_id=$1
       AND time BETWEEN $2 AND $3
+    ORDER BY time DESC
     LIMIT $4
     `
   const { rows } = await pool.query(sql, [account_id, from, to, Number(limit)])
