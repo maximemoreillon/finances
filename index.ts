@@ -10,7 +10,12 @@ import cors from "cors"
 import oidcAuth from "@moreillon/express-oidc"
 import auth from "@moreillon/express_identification_middleware"
 import group_auth from "@moreillon/express_group_based_authorization_middleware"
-import { pool, TIMESCALEDB_DATABASE, TIMESCALEDB_HOST, TIMESCALEDB_PORT } from "./db"
+import {
+  pool,
+  TIMESCALEDB_DATABASE,
+  TIMESCALEDB_HOST,
+  TIMESCALEDB_PORT,
+} from "./db"
 import promBundle from "express-prom-bundle"
 
 import accountsRouter from "./routes/accounts"
@@ -29,6 +34,9 @@ const {
 process.env.TZ = TZ || "Asia/Tokyo"
 const promOptions = { includeMethod: true, includePath: true }
 
+console.log(
+  `[DB] connecting to postgresql://***:***@${TIMESCALEDB_HOST}:${TIMESCALEDB_PORT}/${TIMESCALEDB_DATABASE}`
+)
 pool.connect().then(() => {
   console.log("[DB] Connected")
 })
@@ -56,8 +64,8 @@ app.get("/", (req, res) => {
     db: {
       host: TIMESCALEDB_HOST,
       port: TIMESCALEDB_PORT,
-      db: TIMESCALEDB_DATABASE
-    }
+      db: TIMESCALEDB_DATABASE,
+    },
   })
 })
 

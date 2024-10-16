@@ -66,20 +66,21 @@ export const readTransactions = async (req: Request, res: Response) => {
 
   // Querying categories
   // TODO: try to achieve in a single SQL query
-  const { rows: keywords } = await pool.query(
+
+  const { rows: transactionCategories } = await pool.query(
     `
-    SELECT word, name AS categoryname, category.id as categoryid
-    FROM keyword
-    INNER JOIN category ON category.id = keyword.category_id
+    SELECT category.name AS categoryname, category_id, transaction_id
+    FROM transaction_category
+    INNER JOIN category ON category.id = transaction_category.category_id
     `,
     []
   )
 
   const records = transactions.map((t) => ({
     ...t,
-    categories: keywords
-      .filter((k) => t.description.includes(k.word))
-      .map((k) => ({ id: k.categoryid, name: k.categoryname })),
+    categories: transactionCategories
+      .filter((tc) => tc.transaction_id === t.id)
+      .map((tc) => ({ id: tc.category_id, name: tc.categoryname })),
   }))
 
   res.send({ limit: Number(limit), records })
