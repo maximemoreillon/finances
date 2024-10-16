@@ -1,93 +1,39 @@
 import createHttpError from "http-errors"
-import { Point } from "@influxdata/influxdb-client"
-import { INFLUXDB_BUCKET, writeApi, influx_read } from "../influxdb"
 import { Request, Response } from "express"
+import { pool } from "../db"
 
-export const register_balance = async (req: Request, res: Response) => {
-  // TODO: use params
-  const account =
-    req.body.account ||
-    req.body.account_name ||
-    req.params.account ||
-    req.params.account_name
+export const registerBalance = async (req: Request, res: Response) => {
+  const { account_id } = req.params
+  const { time = new Date(), balance } = req.body
 
-  const { currency, balance, time } = req.body
+  if (!balance) throw createHttpError(400, `Missing balance`)
 
-  if (!currency) throw createHttpError(400, `currency not provided`)
-  if (!balance) throw createHttpError(400, `balance not provided`)
-  if (!account) throw createHttpError(400, `Account not defined`)
+  const sql = `
+    INSERT INTO balance(account_id, time, balance) 
+    VALUES($1, $2, $3)
+    RETURNING *
+  `
+  const {
+    rows: [newBalance],
+  } = await pool.query(sql, [account_id, time, balance])
 
-  // Create point
-  const point = new Point(account).tag("currency", currency)
-
-  // Timestamp
-  if (time) point.timestamp(new Date(time))
-  else point.timestamp(new Date())
-
-  // Add weight
-  if (typeof balance === "number") point.floatField("balance", balance)
-  else point.floatField("balance", parseFloat(balance))
-
-  // write (flush is to actually perform the operation)
-  writeApi.writePoint(point)
-  await writeApi.flush()
-
-  console.log(`Point created in measurement ${account}: ${balance}`)
-
-  // Respond
-  res.send(point)
+  res.send(newBalance)
 }
 
-export const get_balance_history = async (req: Request, res: Response) => {
-  const { account } = req.params
+export const readBalance = async (req: Request, res: Response) => {
+  const { account_id } = req.params
+  if (!account_id) throw createHttpError(400, `Missing account id`)
 
-  // Filters
-  // Using let because some variable types might change
-  let {
-    start = "0", // by default, query all points
-    stop,
-    last,
-  } = req.query
+  const { from = new Date(0), to = new Date(), limit = "1000" } = req.query
 
-  const stop_query = stop ? `stop: ${stop}` : ""
-
-  // NOTE: check for risks of injection
-  let query = `from(bucket:"${INFLUXDB_BUCKET}")
-      |> range(start: ${start}, ${stop_query})`
-
-  if (account) {
-    query = `${query}
-      |> filter(fn: (r) => r._measurement == "${account}")`
-  }
-
-  if (last) {
-    query = `${query}
-      |> last()`
-  }
-
-  // Run the query
-  const points = await influx_read(query)
-
-  // Respond to client
-  res.send(points)
-
-  console.log(`Balance history of account ${account} queried`)
-}
-
-export const get_accounts_with_balance = async () => {
-  const query = `
-    import \"influxdata/influxdb/schema\"
-    schema.measurements(bucket: \"${INFLUXDB_BUCKET}\")
+  const sql = `
+    SELECT * FROM balance 
+    WHERE account_id=$1
+      AND time BETWEEN $2 AND $3
+    LIMIT $4
     `
-
-  // Run the query
-  const result = (await influx_read(query)) as any[]
-
-  // Extract measurements from result
-  return result.map((r: any) => r._value)
+  const { rows } = await pool.query(sql, [account_id, from, to, Number(limit)])
+  res.send({ from, to, limit: Number(limit), records: rows })
 }
 
-export const get_accounts = async (req: Request, res: Response) => {
-  const accounts = await get_accounts_with_balance()
-  res.send(accounts)
-}
+// TODO: Delete balance record

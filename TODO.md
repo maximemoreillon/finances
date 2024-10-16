@@ -1,0 +1,11 @@
+- [x] Categories in GET /account/:accountId/transactions
+- [x] Cascade
+- [ ] ~~Bulk insert~~
+- [x] Transactions reverse order
+- [x] Start Stop queries from front-end
+- [ ] PUT /keywords/:keyword_id
+- [ ] PUT /transactions/:transaction_id
+- [ ] Type definition for objects
+- [ ] GET /transactions independent of account
+- [ ] K8s secret entries for TimescaleDB
+- [ ] Transactions either paginated or queried by date

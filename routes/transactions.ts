@@ -1,27 +1,32 @@
 import { Router } from "express"
 import {
-  register_transactions,
-  get_transactions,
-  get_transaction,
-  get_accounts,
+  registerTransaction,
+  readTransaction,
+  readTransactions,
   update_transaction,
   delete_transaction,
 } from "../controllers/transactions"
-import transaction_categories_router from "./transaction_categories"
+import {
+  addCategoryToStransaction,
+  readTransactionCategories,
+  removeCategoryFromtransaction,
+} from "../controllers/transactionCategories"
 
 const router = Router({ mergeParams: true })
 
-router.route("/").get(get_transactions).post(register_transactions)
+router.route("/").get(readTransactions).post(registerTransaction)
 
-router.use("/categories", transaction_categories_router)
-
-router.route("/accounts").get(get_accounts)
+router.route("/:transaction_id").get(readTransaction).delete(delete_transaction)
+// .patch(update_transaction)
+// .put(update_transaction)
 
 router
-  .route("/:transaction_id")
-  .get(get_transaction)
-  .delete(delete_transaction)
-  .patch(update_transaction)
-  .put(update_transaction)
+  .route("/:transaction_id/categories")
+  .post(addCategoryToStransaction)
+  .get(readTransactionCategories)
+
+router
+  .route("/:transaction_id/categories/:category_id")
+  .delete(removeCategoryFromtransaction)
 
 export default router
