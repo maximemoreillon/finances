@@ -43,7 +43,8 @@ export const removeCategoryFromtransaction = async (
   const { transaction_id, category_id } = req.params
   const sql = `
     DELETE FROM transaction_category 
-    WHERE transaction_id=$1 AND category_id=$2`
+    WHERE transaction_id=$1 
+      AND category_id=$2`
 
   await pool.query(sql, [transaction_id, category_id])
 

@@ -49,15 +49,8 @@ export const registerTransaction = async (req: Request, res: Response) => {
 export const readTransactions = async (req: Request, res: Response) => {
   const { account_id } = req.params
 
-  // TODO: from and to optional
-  const {
-    // 12 months ago by default
-    from = new Date(new Date().setMonth((new Date().getMonth() - 12) % 12)),
-    to = new Date(),
-    limit = "500",
-  } = req.query
+  const { from = new Date(0), to = new Date(), limit = "500" } = req.query
 
-  // TODO: from and to optional
   // TODO: have account_id optional, if not provided then all accounts
   // In that case, add account name to transactions
   const { rows: transactions } = await pool.query(

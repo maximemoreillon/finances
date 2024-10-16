@@ -24,12 +24,7 @@ export const readBalance = async (req: Request, res: Response) => {
   const { account_id } = req.params
   if (!account_id) throw createHttpError(400, `Missing account id`)
 
-  const {
-    // 12 months ago by default
-    from = new Date(new Date().setMonth((new Date().getMonth() - 12) % 12)),
-    to = new Date(),
-    limit = "1000",
-  } = req.query
+  const { from = new Date(0), to = new Date(), limit = "1000" } = req.query
 
   const sql = `
     SELECT * FROM balance 
@@ -41,4 +36,4 @@ export const readBalance = async (req: Request, res: Response) => {
   res.send({ from, to, limit: Number(limit), records: rows })
 }
 
-// TODO: Delete balance
+// TODO: Delete balance record
