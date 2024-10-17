@@ -21,6 +21,7 @@ import promBundle from "express-prom-bundle"
 import accountsRouter from "./routes/accounts"
 import exchangeRateRouter from "./routes/exchangeRate"
 import categoriesRouter from "./routes/categories"
+import transactionsRouter from "./routes/transactions"
 
 const {
   APP_PORT = 80,
@@ -90,6 +91,7 @@ if (AUTHORIZED_GROUPS && GROUP_AUTHORIZATION_URL) {
 app.use("/accounts", accountsRouter)
 app.use("/rate", exchangeRateRouter)
 app.use("/categories", categoriesRouter)
+app.use("/transactions", transactionsRouter)
 
 app.listen(APP_PORT, () => {
   console.log(`[Express] Finances API listening on *:${APP_PORT}`)

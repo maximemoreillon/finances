@@ -46,23 +46,42 @@ export const registerTransaction = async (req: Request, res: Response) => {
   // TODO: find better way
   else res.send({ account_id, time, amount, description })
 }
+
 export const readTransactions = async (req: Request, res: Response) => {
   const { account_id } = req.params
 
   const { from = new Date(0), to = new Date(), limit = "10000" } = req.query
 
-  // TODO: have account_id optional, if not provided then all accounts
-  // In that case, add account name to transactions
-  const { rows: transactions } = await pool.query(
-    `
-    SELECT * FROM transaction 
-    WHERE account_id=$1
-      AND time BETWEEN $2 AND $3
-    ORDER BY time DESC
-    LIMIT $4
-    `,
-    [account_id, from, to, limit]
-  )
+  let transactions = []
+
+  // TODO: There must be a nicer way
+  if (account_id) {
+    // TODO: inner join for account name and currency
+    const { rows } = await pool.query(
+      `
+      SELECT * 
+      FROM transaction 
+      WHERE time BETWEEN $1 AND $2
+        AND account_id=$4
+      ORDER BY time DESC
+      LIMIT $3
+      `,
+      [from, to, limit, account_id]
+    )
+    transactions = rows
+  } else {
+    const { rows } = await pool.query(
+      `
+      SELECT * 
+      FROM transaction 
+      WHERE time BETWEEN $1 AND $2
+      ORDER BY time DESC
+      LIMIT $3
+      `,
+      [from, to, limit]
+    )
+    transactions = rows
+  }
 
   // Querying categories
   // TODO: try to achieve in a single SQL query

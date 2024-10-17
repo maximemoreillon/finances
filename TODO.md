@@ -9,3 +9,4 @@
 - [ ] GET /transactions independent of account
 - [ ] K8s secret entries for TimescaleDB
 - [ ] Transactions either paginated or queried by date
+- [ ] List transactions of a specific category
