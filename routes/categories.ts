@@ -19,6 +19,6 @@ router
   .delete(deleteCategory)
 
 router.use("/:category_id/keywords", keywordsRouter)
-// router.use("/:category_id/transactions", readTransactions)
+router.get("/:category_id/transactions", readTransactions)
 
 export default router
