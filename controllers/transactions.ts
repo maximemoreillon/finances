@@ -109,7 +109,7 @@ export const readTransactions = async (req: Request, res: Response) => {
       .map((tc) => ({ id: tc.category_id, name: tc.categoryname })),
   }))
 
-  res.send({ limit: Number(limit), records })
+  res.send({ limit: Number(limit), to, from, offset: Number(offset), records })
 }
 
 export const readTransaction = async (req: Request, res: Response) => {

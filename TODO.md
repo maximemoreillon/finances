@@ -5,8 +5,8 @@
 - [x] Start Stop queries from front-end
 - [ ] PUT /keywords/:keyword_id
 - [ ] PUT /transactions/:transaction_id
-- [ ] Type definition for objects
-- [ ] GET /transactions independent of account
-- [ ] K8s secret entries for TimescaleDB
+- [ ] Type definitions
+- [x] GET /transactions independent of account
+- [x] K8s secret entries for TimescaleDB
 - [ ] Transactions either paginated or queried by date
 - [ ] List transactions of a specific category
