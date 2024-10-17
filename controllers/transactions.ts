@@ -50,11 +50,16 @@ export const registerTransaction = async (req: Request, res: Response) => {
 export const readTransactions = async (req: Request, res: Response) => {
   const { account_id } = req.params
 
-  const { from = new Date(0), to = new Date(), limit = "10000" } = req.query
+  const {
+    from = new Date(0),
+    to = new Date(),
+    limit = "10000",
+    offset = "0",
+  } = req.query
 
   let transactions = []
 
-  // TODO: There must be a nicer way
+  // TODO: There must be a less redundant way
   if (account_id) {
     // TODO: inner join for account name and currency
     const { rows } = await pool.query(
@@ -62,11 +67,12 @@ export const readTransactions = async (req: Request, res: Response) => {
       SELECT * 
       FROM transaction 
       WHERE time BETWEEN $1 AND $2
-        AND account_id=$4
+        AND account_id=$5
       ORDER BY time DESC
       LIMIT $3
+      OFFSET $4
       `,
-      [from, to, limit, account_id]
+      [from, to, limit, offset, account_id]
     )
     transactions = rows
   } else {
@@ -77,8 +83,9 @@ export const readTransactions = async (req: Request, res: Response) => {
       WHERE time BETWEEN $1 AND $2
       ORDER BY time DESC
       LIMIT $3
+      OFFSET $4
       `,
-      [from, to, limit]
+      [from, to, limit, offset]
     )
     transactions = rows
   }
