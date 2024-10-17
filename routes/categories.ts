@@ -7,6 +7,7 @@ import {
   deleteCategory,
 } from "../controllers/categories"
 import keywordsRouter from "./keywords"
+import { readTransactions } from "../controllers/transactions"
 const router = Router({ mergeParams: true })
 
 router.route("/").post(createCategory).get(readCategories)
@@ -18,5 +19,6 @@ router
   .delete(deleteCategory)
 
 router.use("/:category_id/keywords", keywordsRouter)
+// router.use("/:category_id/transactions", readTransactions)
 
 export default router

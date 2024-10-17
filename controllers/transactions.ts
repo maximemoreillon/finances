@@ -49,7 +49,6 @@ export const registerTransaction = async (req: Request, res: Response) => {
 
 export const readTransactions = async (req: Request, res: Response) => {
   const { account_id } = req.params
-
   const {
     from = new Date(0),
     to = new Date(),
@@ -57,38 +56,22 @@ export const readTransactions = async (req: Request, res: Response) => {
     offset = "0",
   } = req.query
 
-  let transactions = []
+  // NOTE: an inner join like
+  // INNER JOIN transaction_category ON transaction_category.transaction_id=transaction.id
+  // Would create duplicates
 
-  // TODO: There must be a less redundant way
-  if (account_id) {
-    // TODO: inner join for account name and currency
-    const { rows } = await pool.query(
-      `
-      SELECT * 
-      FROM transaction 
-      WHERE time BETWEEN $1 AND $2
-        AND account_id=$5
-      ORDER BY time DESC
-      LIMIT $3
-      OFFSET $4
-      `,
-      [from, to, limit, offset, account_id]
-    )
-    transactions = rows
-  } else {
-    const { rows } = await pool.query(
-      `
-      SELECT * 
-      FROM transaction 
-      WHERE time BETWEEN $1 AND $2
-      ORDER BY time DESC
-      LIMIT $3
-      OFFSET $4
-      `,
-      [from, to, limit, offset]
-    )
-    transactions = rows
-  }
+  const { rows: transactions } = await pool.query(
+    `
+    SELECT time, transaction.id AS id, description, amount, account_id
+    FROM transaction 
+    WHERE time BETWEEN $1 AND $2
+      AND ($5::int IS NULL OR account_id=$5) 
+    ORDER BY time DESC
+    LIMIT $3
+    OFFSET $4
+    `,
+    [from, to, limit, offset, account_id]
+  )
 
   // Querying categories
   // TODO: try to achieve in a single SQL query
@@ -97,7 +80,7 @@ export const readTransactions = async (req: Request, res: Response) => {
     `
     SELECT category.name AS categoryname, category_id, transaction_id
     FROM transaction_category
-    INNER JOIN category ON category.id = transaction_category.category_id
+    INNER JOIN category ON category.id=transaction_category.category_id
     `,
     []
   )
