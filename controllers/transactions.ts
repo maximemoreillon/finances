@@ -62,7 +62,7 @@ export const readTransactions = async (req: Request, res: Response) => {
     `
     SELECT time, transaction.id AS id, description, amount, account_id
     FROM transaction 
-    INNER JOIN transaction_category ON transaction_category.transaction_id=transaction.id
+    LEFT JOIN transaction_category ON transaction_category.transaction_id=transaction.id
     WHERE time BETWEEN $1 AND $2
       AND ($5::int IS NULL OR account_id=$5) 
       AND ($6::int IS NULL OR transaction_category.category_id=$6) 
