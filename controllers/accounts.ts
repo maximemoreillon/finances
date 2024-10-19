@@ -22,7 +22,29 @@ export const createAccount = async (req: Request, res: Response) => {
 }
 
 export const readAccounts = async (req: Request, res: Response) => {
-  const sql = "SELECT * FROM account"
+  const sql = `
+    SELECT id, name, currency, balance, transaction_count
+    FROM account 
+
+    --- Adding latest balance
+    LEFT JOIN (
+      SELECT balance, balance.account_id
+      FROM balance
+      INNER JOIN (
+          SELECT account_id, max(time) AS max_time
+          FROM balance
+          GROUP BY balance.account_id
+      ) temp ON balance.account_id = temp.account_id AND balance.time = temp.max_time
+      RIGHT JOIN account ON balance.account_id=account.id
+    ) xxx ON account_id = account.id
+    --- Adding transaction count
+
+    LEFT JOIN (
+      SELECT account_id, count(id) AS transaction_count
+      FROM transaction
+      GROUP BY account_id
+    ) transaction_temp ON account.id = transaction_temp.account_id
+    `
   const { rows } = await pool.query(sql)
 
   res.send({ accounts: rows })
