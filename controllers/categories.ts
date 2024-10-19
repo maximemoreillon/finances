@@ -20,7 +20,12 @@ export const createCategory = async (req: Request, res: Response) => {
 }
 
 export const readCategories = async (req: Request, res: Response) => {
-  const { rows } = await pool.query(`SELECT * FROM category`)
+  const { rows } = await pool.query(`
+    SELECT category.id, category.name, COUNT(transaction_category.category_id) as transaction_count
+    FROM category
+    LEFT JOIN transaction_category ON transaction_category.category_id=category.id
+    GROUP BY category.id
+    `)
 
   // Adding keywords
   // TODO: achieve this with a single SQL query
