@@ -16,9 +16,11 @@ const router = Router({ mergeParams: true })
 
 router.route("/").get(readTransactions).post(registerTransaction)
 
-router.route("/:transaction_id").get(readTransaction).delete(delete_transaction)
-// .patch(update_transaction)
-// .put(update_transaction)
+router
+  .route("/:transaction_id")
+  .get(readTransaction)
+  .put(update_transaction)
+  .delete(delete_transaction)
 
 router
   .route("/:transaction_id/categories")

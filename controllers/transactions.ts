@@ -116,7 +116,25 @@ export const readTransaction = async (req: Request, res: Response) => {
 }
 
 export const update_transaction = async (req: Request, res: Response) => {
-  res.status(500).send("WIP")
+  const { transaction_id } = req.params
+  if (!transaction_id) throw createHttpError(400, `Missing transaction id`)
+
+  // TODO: Date
+  const { description, amount } = req.body
+  if (!description) throw createHttpError(400, `Missing description`)
+  if (!amount) throw createHttpError(400, `Missing amount`)
+
+  const sql = `
+    UPDATE transaction
+    SET description=$2, amount=$3
+    WHERE id=$1
+    RETURNING *`
+
+  const {
+    rows: [category],
+  } = await pool.query(sql, [transaction_id, description, amount])
+
+  res.send(category)
 }
 
 export const delete_transaction = async (req: Request, res: Response) => {
