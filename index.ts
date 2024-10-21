@@ -22,6 +22,7 @@ import accountsRouter from "./routes/accounts"
 import exchangeRateRouter from "./routes/exchangeRate"
 import categoriesRouter from "./routes/categories"
 import transactionsRouter from "./routes/transactions"
+import keywordsRouter from "./routes/keywords"
 
 const {
   APP_PORT = 80,
@@ -92,6 +93,7 @@ app.use("/accounts", accountsRouter)
 app.use("/rate", exchangeRateRouter)
 app.use("/categories", categoriesRouter)
 app.use("/transactions", transactionsRouter)
+app.use("/keywords", keywordsRouter)
 
 app.listen(APP_PORT, () => {
   console.log(`[Express] Finances API listening on *:${APP_PORT}`)

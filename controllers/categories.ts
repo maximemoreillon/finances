@@ -83,6 +83,7 @@ export const deleteCategory = async (req: Request, res: Response) => {
 }
 
 export const applyCategories = async (req: Request, res: Response) => {
+  // TODO: do that as a single SQL query
   const { rows: transactions } = await pool.query(
     `SELECT id, description FROM transaction`
   )

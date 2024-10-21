@@ -6,6 +6,7 @@ export const createKeyword = async (req: Request, res: Response) => {
   const { category_id } = req.params
   const { word } = req.body
 
+  if (!category_id) throw createHttpError(400, `Missing category_id`)
   if (!word) throw createHttpError(400, `Missing word`)
 
   const sql = `
@@ -22,6 +23,7 @@ export const createKeyword = async (req: Request, res: Response) => {
 
 export const readCategoryKeywords = async (req: Request, res: Response) => {
   const { category_id } = req.params
+  if (!category_id) throw createHttpError(400, `Missing category_id`)
 
   const sql = "SELECT * FROM keyword WHERE category_id=$1"
   const { rows } = await pool.query(sql, [category_id])
@@ -29,8 +31,35 @@ export const readCategoryKeywords = async (req: Request, res: Response) => {
   res.send({ keywords: rows })
 }
 
-// TODO: Update keyword
+export const readKeyword = async (req: Request, res: Response) => {
+  const { keyword_id } = req.params
 
+  const sql = "SELECT * FROM keyword WHERE id=$1"
+  const {
+    rows: [keyword],
+  } = await pool.query(sql, [keyword_id])
+
+  res.send(keyword)
+}
+
+export const updateKeyword = async (req: Request, res: Response) => {
+  const { keyword_id } = req.params
+  const { word } = req.body
+
+  if (!word) throw createHttpError(400, `Missing word`)
+
+  const sql = `
+    UPDATE keyword
+    SET word=$2
+    WHERE id=$1
+    RETURNING *`
+
+  const {
+    rows: [keyword],
+  } = await pool.query(sql, [keyword_id, word])
+
+  res.send(keyword)
+}
 export const deleteKeyword = async (req: Request, res: Response) => {
   const { keyword_id } = req.params
   const sql = "DELETE FROM keyword WHERE id=$1"
