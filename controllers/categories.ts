@@ -61,7 +61,6 @@ export const updateCategory = async (req: Request, res: Response) => {
 
   if (!name) throw createHttpError(400, `Missing name`)
 
-  // TODO: Generic version
   const sql = `
     UPDATE category
     SET name=$2

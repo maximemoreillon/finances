@@ -63,6 +63,26 @@ export const readAccount = async (req: Request, res: Response) => {
   res.send(account)
 }
 
+export const updateAccount = async (req: Request, res: Response) => {
+  const { account_id } = req.params
+  const { name, currency } = req.body
+
+  if (!name) throw createHttpError(400, `Missing name`)
+  if (!currency) throw createHttpError(400, `Missing currency`)
+
+  const sql = `
+    UPDATE account
+    SET name=$2, currency=$3
+    WHERE id=$1
+    RETURNING *`
+
+  const {
+    rows: [account],
+  } = await pool.query(sql, [account_id, name, currency])
+
+  res.send(account)
+}
+
 export const deleteAccount = async (req: Request, res: Response) => {
   const { account_id } = req.params
   const sql = "DELETE FROM account WHERE id=$1"
