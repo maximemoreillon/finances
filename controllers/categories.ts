@@ -81,3 +81,38 @@ export const deleteCategory = async (req: Request, res: Response) => {
 
   res.send({ id: category_id })
 }
+
+export const applyCategories = async (req: Request, res: Response) => {
+  const { rows: transactions } = await pool.query(
+    `SELECT id, description FROM transaction`
+  )
+
+  const { rows: keywords } = await pool.query(
+    `SELECT word, category_id FROM keyword`
+  )
+
+  let categoriesAdded = 0
+
+  for (const { description, id: transaction_id } of transactions) {
+    const matchingCategories = keywords.filter(({ word }) =>
+      description.includes(word)
+    )
+
+    for (const { category_id } of matchingCategories) {
+      const {
+        rows: [affectedTransaction],
+      } = await pool.query(
+        `
+            INSERT INTO transaction_category(transaction_id, category_id) 
+            VALUES($1, $2) 
+            ON CONFLICT DO NOTHING
+            RETURNING *`,
+        [transaction_id, category_id]
+      )
+
+      if (affectedTransaction) categoriesAdded++
+    }
+  }
+
+  res.send({ categoriesAdded })
+}

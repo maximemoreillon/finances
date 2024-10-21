@@ -1,11 +1,11 @@
+// NOTE: This can now be done with PATCH /categories
+
 import { pool } from "../db"
 
 async function main() {
   pool.connect()
 
   try {
-    // WIP
-
     const { rows: transactions } = await pool.query(
       `SELECT id, description FROM transaction`
     )
