@@ -29,12 +29,10 @@ export const readCategories = async (req: Request, res: Response) => {
 
   // Adding keywords
   // TODO: achieve this with a single SQL query
-  const { rows: keywords } = await pool.query(
-    `SELECT word, category_id FROM keyword`
-  )
+  const { rows: keywords } = await pool.query(`SELECT * FROM keyword`)
   const categories = rows.map((c) => ({
     ...c,
-    keywords: keywords.filter((k) => k.category_id === c.id).map((k) => k.word),
+    keywords: keywords.filter((k) => k.category_id === c.id),
   }))
 
   res.send({ categories })
