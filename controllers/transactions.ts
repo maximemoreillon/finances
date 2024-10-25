@@ -119,20 +119,20 @@ export const update_transaction = async (req: Request, res: Response) => {
   const { transaction_id } = req.params
   if (!transaction_id) throw createHttpError(400, `Missing transaction id`)
 
-  // TODO: Date
-  const { description, amount } = req.body
+  const { description, amount, time } = req.body
   if (!description) throw createHttpError(400, `Missing description`)
   if (!amount) throw createHttpError(400, `Missing amount`)
+  if (!time) throw createHttpError(400, `Missing time`)
 
   const sql = `
     UPDATE transaction
-    SET description=$2, amount=$3
+    SET description=$2, amount=$3, time=$4
     WHERE id=$1
     RETURNING *`
 
   const {
     rows: [category],
-  } = await pool.query(sql, [transaction_id, description, amount])
+  } = await pool.query(sql, [transaction_id, description, amount, time])
 
   res.send(category)
 }
