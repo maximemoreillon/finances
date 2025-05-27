@@ -15,11 +15,6 @@ spec:
       containers:
         - name: ${APPLICATION_NAME}
           image: ${CONTAINER_IMAGE_TAGGED}
-          # env:
-          #   - name: GROUP_AUTHORIZATION_URL
-          #     value: https://api.groups.maximemoreillon.com/v3/users/self/groups
-          #   - name: AUTHORIZED_GROUPS
-          #     value: 0035cdb9-838a-4cdd-8ab5-61dafdf569d8
           envFrom:
             - secretRef:
                 name: environment-variables
@@ -32,32 +27,31 @@ kind: Service
 metadata:
   name: ${APPLICATION_NAME}
 spec:
-  # type: ClusterIP
-  type: NodePort
+  type: ClusterIP
   selector:
     app: ${APPLICATION_NAME}
   ports:
     - port: 80
 ---
-# apiVersion: networking.k8s.io/v1
-# kind: Ingress
-# metadata:
-#   name: ${APPLICATION_NAME}
-#   annotations:
-#     cert-manager.io/cluster-issuer: letsencrypt
-# spec:
-#   tls:
-#     - hosts:
-#         - ${K8S_INGRESS_HOST}
-#       secretName: ${APPLICATION_NAME}-tls
-#   rules:
-#     - host: ${K8S_INGRESS_HOST}
-#       http:
-#         paths:
-#           - path: /
-#             pathType: Prefix
-#             backend:
-#               service:
-#                 name: ${APPLICATION_NAME}
-#                 port:
-#                   number: 80
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ${APPLICATION_NAME}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  tls:
+    - hosts:
+        - ${K8S_INGRESS_HOST}
+      secretName: ${APPLICATION_NAME}-tls
+  rules:
+    - host: ${K8S_INGRESS_HOST}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ${APPLICATION_NAME}
+                port:
+                  number: 80
