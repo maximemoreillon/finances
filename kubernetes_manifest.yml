@@ -15,11 +15,17 @@ spec:
       containers:
         - name: ${APPLICATION_NAME}
           image: ${CONTAINER_IMAGE_TAGGED}
+          env:
+            - name: TIMESCALEDB_HOST
+              value: timescaledb.timescale
           envFrom:
+            # - secretRef:
+            #     name: environment-variables
+            # - secretRef:
+            #     name: auth0-env
             - secretRef:
-                name: environment-variables
-            - secretRef:
-                name: auth0-env
+                name: finances-env-from-vault
+          resources: {}
 
 ---
 apiVersion: v1
@@ -55,3 +61,19 @@ spec:
                 name: ${APPLICATION_NAME}
                 port:
                   number: 80
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: finances-env
+spec:
+  refreshInterval: 5m0s
+  secretStoreRef:
+    name: vault
+    kind: ClusterSecretStore
+  target:
+    name: finances-env-from-vault
+    creationPolicy: Orphan
+  dataFrom:
+    - extract:
+        key: finances

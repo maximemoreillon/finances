@@ -1,6 +1,4 @@
-import pg from "pg"
-import dotenv from "dotenv"
-dotenv.config()
+import pg from "pg";
 
 export const {
   TIMESCALEDB_HOST = "localhost",
@@ -8,7 +6,7 @@ export const {
   TIMESCALEDB_USER = "postgres",
   TIMESCALEDB_PASSWORD = "",
   TIMESCALEDB_DATABASE = "finances",
-} = process.env
+} = process.env;
 
 export const pool = new pg.Pool({
   host: TIMESCALEDB_HOST,
@@ -16,4 +14,4 @@ export const pool = new pg.Pool({
   database: TIMESCALEDB_DATABASE,
   user: TIMESCALEDB_USER,
   password: TIMESCALEDB_PASSWORD,
-})
+});
