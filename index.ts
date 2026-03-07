@@ -3,7 +3,7 @@ import "dotenv/config";
 import { version, author } from "./package.json";
 console.log(`Finances manager v${version}`);
 
-import express from "express";
+import express, { Router } from "express";
 import "express-async-errors";
 import cors from "cors";
 import oidcAuth from "@moreillon/express-oidc";
@@ -47,7 +47,9 @@ app.use(express.json());
 app.use(cors());
 app.use(promBundle(promOptions));
 
-app.get("/", (req, res) => {
+const router = Router();
+
+router.get("/", (req, res) => {
   res.send({
     application_name: "Finances API",
     author,
@@ -69,16 +71,19 @@ app.get("/", (req, res) => {
 
 if (OIDC_JWKS_URI) {
   console.log(`[Auth] Enabling OIDC authentication using ${OIDC_JWKS_URI}`);
-  app.use(oidcAuth({ jwksUri: OIDC_JWKS_URI }));
+  router.use(oidcAuth({ jwksUri: OIDC_JWKS_URI }));
 } else {
   console.log("[Auth] Authentication disabled");
 }
 
-app.use("/accounts", accountsRouter);
-app.use("/rate", exchangeRateRouter);
-app.use("/categories", categoriesRouter);
-app.use("/transactions", transactionsRouter);
-app.use("/keywords", keywordsRouter);
+router.use("/accounts", accountsRouter);
+router.use("/rate", exchangeRateRouter);
+router.use("/categories", categoriesRouter);
+router.use("/transactions", transactionsRouter);
+router.use("/keywords", keywordsRouter);
+
+app.use("/", router);
+app.use("/api", router);
 
 app.listen(APP_PORT, () => {
   console.log(`[Express] Finances API listening on *:${APP_PORT}`);
