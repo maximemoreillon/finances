@@ -29,6 +29,7 @@ const {
   AUTHORIZED_GROUPS,
   GROUP_AUTHORIZATION_URL,
   TZ,
+  BASE_PATH,
 } = process.env;
 
 process.env.TZ = TZ || "Asia/Tokyo";
@@ -83,7 +84,8 @@ router.use("/transactions", transactionsRouter);
 router.use("/keywords", keywordsRouter);
 
 app.use("/", router);
-app.use("/api", router);
+
+if (BASE_PATH) app.use(BASE_PATH, router);
 
 app.listen(APP_PORT, () => {
   console.log(`[Express] Finances API listening on *:${APP_PORT}`);

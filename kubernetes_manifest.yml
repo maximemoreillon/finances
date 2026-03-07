@@ -18,6 +18,8 @@ spec:
           env:
             - name: TIMESCALEDB_HOST
               value: timescaledb.timescale
+            - name: BASE_PATH
+              value: /api
           envFrom:
             # - secretRef:
             #     name: environment-variables
