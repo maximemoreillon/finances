@@ -7,8 +7,6 @@ import express, { Router } from "express";
 import "express-async-errors";
 import cors from "cors";
 import oidcAuth from "@moreillon/express-oidc";
-import auth from "@moreillon/express_identification_middleware";
-import group_auth from "@moreillon/express_group_based_authorization_middleware";
 import {
   pool,
   TIMESCALEDB_DATABASE,
@@ -23,14 +21,7 @@ import categoriesRouter from "./routes/categories";
 import transactionsRouter from "./routes/transactions";
 import keywordsRouter from "./routes/keywords";
 
-const {
-  APP_PORT = 80,
-  OIDC_JWKS_URI,
-  AUTHORIZED_GROUPS,
-  GROUP_AUTHORIZATION_URL,
-  TZ,
-  BASE_PATH,
-} = process.env;
+const { APP_PORT = 80, OIDC_JWKS_URI, TZ, BASE_PATH } = process.env;
 
 process.env.TZ = TZ || "Asia/Tokyo";
 const promOptions = { includeMethod: true, includePath: true };
@@ -55,12 +46,10 @@ router.get("/", (req, res) => {
     application_name: "Finances API",
     author,
     version,
+    base_path: BASE_PATH || "/",
     auth: {
+      enabled: !!OIDC_JWKS_URI,
       oidc_jwks_uri: OIDC_JWKS_URI,
-      group_auth: {
-        url: GROUP_AUTHORIZATION_URL,
-        groups: AUTHORIZED_GROUPS,
-      },
     },
     db: {
       host: TIMESCALEDB_HOST,
