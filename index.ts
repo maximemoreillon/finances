@@ -7,12 +7,7 @@ import express, { Router } from "express";
 import "express-async-errors";
 import cors from "cors";
 import oidcAuth from "@moreillon/express-oidc";
-import {
-  pool,
-  TIMESCALEDB_DATABASE,
-  TIMESCALEDB_HOST,
-  TIMESCALEDB_PORT,
-} from "./db";
+import { pool, DB_DATABASE, DB_HOST, DB_PORT } from "./db";
 import promBundle from "express-prom-bundle";
 
 import accountsRouter from "./routes/accounts";
@@ -27,7 +22,7 @@ process.env.TZ = TZ || "Asia/Tokyo";
 const promOptions = { includeMethod: true, includePath: true };
 
 console.log(
-  `[DB] connecting to postgresql://***:***@${TIMESCALEDB_HOST}:${TIMESCALEDB_PORT}/${TIMESCALEDB_DATABASE}`,
+  `[DB] connecting to postgresql://***:***@${DB_HOST}:${DB_PORT}/${DB_DATABASE}`,
 );
 pool.connect().then(() => {
   console.log("[DB] Connected");
@@ -52,9 +47,9 @@ router.get("/", (req, res) => {
       oidc_jwks_uri: OIDC_JWKS_URI,
     },
     db: {
-      host: TIMESCALEDB_HOST,
-      port: TIMESCALEDB_PORT,
-      db: TIMESCALEDB_DATABASE,
+      host: DB_HOST,
+      port: DB_PORT,
+      db: DB_DATABASE,
     },
   });
 });

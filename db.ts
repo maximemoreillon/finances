@@ -1,17 +1,18 @@
 import pg from "pg";
 
 export const {
-  TIMESCALEDB_HOST = "localhost",
-  TIMESCALEDB_PORT = "5432",
-  TIMESCALEDB_USER = "postgres",
-  TIMESCALEDB_PASSWORD = "",
-  TIMESCALEDB_DATABASE = "finances",
+  DB_HOST = "localhost",
+  DB_PORT = "5432",
+  DB_USER = "postgres",
+  DB_PASSWORD = "",
+  DB_DATABASE = "finances",
+  DB_ENABLED,
 } = process.env;
 
 export const pool = new pg.Pool({
-  host: TIMESCALEDB_HOST,
-  port: Number(TIMESCALEDB_PORT),
-  database: TIMESCALEDB_DATABASE,
-  user: TIMESCALEDB_USER,
-  password: TIMESCALEDB_PASSWORD,
+  host: DB_HOST,
+  port: Number(DB_PORT),
+  database: DB_DATABASE,
+  user: DB_USER,
+  password: DB_PASSWORD,
 });

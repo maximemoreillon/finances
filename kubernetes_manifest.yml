@@ -16,15 +16,11 @@ spec:
         - name: ${APPLICATION_NAME}
           image: ${CONTAINER_IMAGE_TAGGED}
           env:
-            - name: TIMESCALEDB_HOST
+            - name: DB_HOST
               value: timescaledb.timescale
             - name: BASE_PATH
               value: /api
           envFrom:
-            # - secretRef:
-            #     name: environment-variables
-            # - secretRef:
-            #     name: auth0-env
             - secretRef:
                 name: finances-env-from-vault
           resources: {}
