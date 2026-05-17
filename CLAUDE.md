@@ -42,18 +42,18 @@ When a transaction is inserted, `utils.ts:addCategoriesToTransaction` scans all 
 
 ### Environment variables
 
-| Variable        | Default      | Purpose                                                                                                      |
-| --------------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
-| `APP_PORT`      | `80`         | Express listen port                                                                                          |
-| `DB_HOST`       | `localhost`  | DB host                                                                                                      |
-| `DB_PORT`       | `5432`       | DB port                                                                                                      |
-| `DB_USER`       | `postgres`   | DB user                                                                                                      |
-| `DB_PASSWORD`   | ``           | DB password                                                                                                  |
-| `DB_DATABASE`   | `finances`   | DB name                                                                                                      |
-| `OIDC_JWKS_URI` | —            | If set, enables OIDC JWT auth on all routes via `@moreillon/express-oidc`                                    |
-| `BASE_PATH`     | —            | If set, mounts the router at an additional path (e.g. `/api`)                                                |
-| `DB_ENABLED`    | —            | Set to `true` to create the `balance` table as a TimescaleDB hypertable when running `tools/createTables.ts` |
-| `TZ`            | `Asia/Tokyo` | Process timezone                                                                                             |
+| Variable              | Default      | Purpose                                                                                                      |
+| --------------------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
+| `APP_PORT`            | `80`         | Express listen port                                                                                          |
+| `DB_HOST`             | `localhost`  | DB host                                                                                                      |
+| `DB_PORT`             | `5432`       | DB port                                                                                                      |
+| `DB_USER`             | `postgres`   | DB user                                                                                                      |
+| `DB_PASSWORD`         | ``           | DB password                                                                                                  |
+| `DB_DATABASE`         | `finances`   | DB name                                                                                                      |
+| `OIDC_JWKS_URI`       | —            | If set, enables OIDC JWT auth on all routes via `@moreillon/express-oidc`                                    |
+| `BASE_PATH`           | —            | If set, mounts the router at an additional path (e.g. `/api`)                                                |
+| `TIMESCALEDB_ENABLED` | —            | Set to `true` to create the `balance` table as a TimescaleDB hypertable when running `tools/createTables.ts` |
+| `TZ`                  | `Asia/Tokyo` | Process timezone                                                                                             |
 
 ### Auth
 

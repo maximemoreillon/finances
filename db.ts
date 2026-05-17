@@ -6,7 +6,7 @@ export const {
   DB_USER = "postgres",
   DB_PASSWORD = "",
   DB_DATABASE = "finances",
-  DB_ENABLED,
+  TIMESCALEDB_ENABLED,
 } = process.env;
 
 export const pool = new pg.Pool({

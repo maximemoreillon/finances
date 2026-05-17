@@ -18,6 +18,8 @@ spec:
           env:
             - name: DB_HOST
               value: timescaledb.timescale
+            - name: TIMESCALEDB_ENABLED
+              value: "true"
             - name: BASE_PATH
               value: /api
           envFrom:

@@ -1,4 +1,4 @@
-import { pool, DB_ENABLED } from "../db";
+import { pool, TIMESCALEDB_ENABLED } from "../db";
 async function main() {
   pool.connect();
 
@@ -32,7 +32,7 @@ async function main() {
       FOREIGN KEY (account_id) REFERENCES account (id) ON DELETE CASCADE
       );`);
 
-    if (DB_ENABLED) {
+    if (TIMESCALEDB_ENABLED) {
       try {
         await pool.query(
           "SELECT create_hypertable('balance', by_range('time'));",
