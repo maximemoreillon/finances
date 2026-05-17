@@ -17,9 +17,7 @@ spec:
           image: ${CONTAINER_IMAGE_TAGGED}
           env:
             - name: DB_HOST
-              value: timescaledb.timescale
-            - name: TIMESCALEDB_ENABLED
-              value: "true"
+              value: postgres.postgresql
             - name: BASE_PATH
               value: /api
           envFrom:

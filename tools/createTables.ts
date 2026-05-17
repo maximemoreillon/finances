@@ -1,4 +1,7 @@
+import "dotenv/config";
+
 import { pool, TIMESCALEDB_ENABLED } from "../db";
+
 async function main() {
   pool.connect();
 
