@@ -1,12 +1,14 @@
 import createHttpError from "http-errors"
 import { Request, Response } from "express"
 import { pool } from "../db"
+import { parseBody, registerBalanceSchema } from "../validation"
 
 export const registerBalance = async (req: Request, res: Response) => {
   const { account_id } = req.params
-  const { time = new Date(), balance } = req.body
-
-  if (!balance) throw createHttpError(400, `Missing balance`)
+  const { time = new Date(), balance } = parseBody(
+    registerBalanceSchema,
+    req.body
+  )
 
   const sql = `
     INSERT INTO balance(account_id, time, balance) 

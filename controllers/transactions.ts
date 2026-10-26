@@ -2,6 +2,11 @@ import createHttpError from "http-errors"
 import { Request, Response } from "express"
 import { pool } from "../db"
 import { addCategoriesToTransaction } from "../utils"
+import {
+  parseBody,
+  registerTransactionSchema,
+  updateTransactionSchema,
+} from "../validation"
 
 // Exported so as to be used in tools/dataImport.ts
 export async function registerSingleTransaction({
@@ -11,7 +16,7 @@ export async function registerSingleTransaction({
   description,
 }: any) {
   if (!account_id) throw createHttpError(400, `Missing account id`)
-  if (!amount) throw createHttpError(400, `Missing amount`)
+  if (amount === undefined) throw createHttpError(400, `Missing amount`)
   if (!description) throw createHttpError(400, `Missing description`)
 
   const {
@@ -33,7 +38,11 @@ export async function registerSingleTransaction({
 
 export const registerTransaction = async (req: Request, res: Response) => {
   const { account_id } = req.params
-  const { time = new Date(), amount, description } = req.body
+  const {
+    time = new Date(),
+    amount,
+    description,
+  } = parseBody(registerTransactionSchema, req.body)
 
   const newTransaction = await registerSingleTransaction({
     account_id,
@@ -120,10 +129,10 @@ export const update_transaction = async (req: Request, res: Response) => {
   const { transaction_id } = req.params
   if (!transaction_id) throw createHttpError(400, `Missing transaction id`)
 
-  const { description, amount, time } = req.body
-  if (!description) throw createHttpError(400, `Missing description`)
-  if (!amount) throw createHttpError(400, `Missing amount`)
-  if (!time) throw createHttpError(400, `Missing time`)
+  const { description, amount, time } = parseBody(
+    updateTransactionSchema,
+    req.body
+  )
 
   const sql = `
     UPDATE transaction
