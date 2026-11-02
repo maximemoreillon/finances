@@ -32,6 +32,15 @@ export const registerBalanceSchema = z.object({
   balance: z.number(),
 })
 
+export const deleteBalanceQuerySchema = z.object({
+  time,
+})
+
+// ISO 4217 code, interpolated into the upstream exchange rate URL
+export const exchangeRateQuerySchema = z.object({
+  currency: z.string().regex(/^[A-Za-z]{3}$/, "Invalid currency code"),
+})
+
 export const parseBody = <T extends z.ZodType>(schema: T, body: unknown) => {
   const result = schema.safeParse(body)
   if (!result.success)

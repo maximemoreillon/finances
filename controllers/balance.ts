@@ -1,7 +1,11 @@
 import createHttpError from "http-errors"
 import { Request, Response } from "express"
 import { pool } from "../db"
-import { parseBody, registerBalanceSchema } from "../validation"
+import {
+  deleteBalanceQuerySchema,
+  parseBody,
+  registerBalanceSchema,
+} from "../validation"
 
 export const registerBalance = async (req: Request, res: Response) => {
   const { account_id } = req.params
@@ -39,4 +43,20 @@ export const readBalance = async (req: Request, res: Response) => {
   res.send({ from, to, limit: Number(limit), records: rows })
 }
 
-// TODO: Delete balance record
+export const deleteBalance = async (req: Request, res: Response) => {
+  const { account_id } = req.params
+  const { time } = parseBody(deleteBalanceQuerySchema, req.query)
+
+  // Balance rows have no id: (account_id, time) identifies a record.
+  // Truncated to milliseconds because times are read back as JS Dates
+  const sql = `
+    DELETE FROM balance
+    WHERE account_id=$1
+      AND date_trunc('milliseconds', time) = date_trunc('milliseconds', $2::timestamptz)
+    RETURNING *
+  `
+  const { rows } = await pool.query(sql, [account_id, time])
+  if (!rows.length) throw createHttpError(404, `Balance record not found`)
+
+  res.send(rows)
+}

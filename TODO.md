@@ -5,7 +5,8 @@
 - [x] Start Stop queries from front-end
 - [x] PUT /keywords/:keyword_id
 - [x] PUT /transactions/:transaction_id
-- [ ] Type definitions
+- [x] Type definitions (zod validation)
+- [x] DELETE balance record
 - [x] GET /transactions independent of account
 - [x] K8s secret entries for TimescaleDB
 - [x] Transactions either paginated or queried by date

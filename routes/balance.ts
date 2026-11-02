@@ -1,8 +1,8 @@
 import { Router } from "express"
-import { readBalance, registerBalance } from "../controllers/balance"
+import { deleteBalance, readBalance, registerBalance } from "../controllers/balance"
 
 const router = Router({ mergeParams: true })
 
-router.route("/").get(readBalance).post(registerBalance)
+router.route("/").get(readBalance).post(registerBalance).delete(deleteBalance)
 
 export default router
