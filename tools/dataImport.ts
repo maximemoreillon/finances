@@ -54,6 +54,7 @@ async function importBalance(access_token: string) {
     }
   } catch (error) {
     console.error(error)
+    process.exitCode = 1
   }
 }
 
@@ -110,6 +111,7 @@ async function importTransactions(accessToken: string) {
     }
   } catch (error) {
     console.error(error)
+    process.exitCode = 1
   }
 }
 
@@ -149,6 +151,7 @@ async function importCategories(access_token: string) {
     }
   } catch (error) {
     console.error(error)
+    process.exitCode = 1
   }
 }
 
@@ -165,14 +168,12 @@ async function main() {
   if (!accessToken) {
     throw new Error("Access token not available")
   }
-  pool.connect()
-
   // await importCategories(accessToken)
   // await importTransactions(accessToken)
   await importBalance(accessToken)
 
   console.log("Finished")
-  pool.end()
+  await pool.end()
 }
 
 main()

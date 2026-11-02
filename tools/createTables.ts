@@ -3,8 +3,6 @@ import "dotenv/config";
 import { pool, TIMESCALEDB_ENABLED } from "../db";
 
 async function main() {
-  pool.connect();
-
   try {
     console.log(`Creating table account`);
     await pool.query(`CREATE TABLE IF NOT EXISTS account (
@@ -75,9 +73,10 @@ async function main() {
       )`);
   } catch (error) {
     console.error(error);
+    process.exitCode = 1;
   } finally {
     console.log("Finished");
-    pool.end();
+    await pool.end();
   }
 }
 

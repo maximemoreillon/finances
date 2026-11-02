@@ -3,8 +3,6 @@
 import { pool } from "../db"
 
 async function main() {
-  pool.connect()
-
   try {
     const { rows: transactions } = await pool.query(
       `SELECT id, description FROM transaction`
@@ -32,9 +30,10 @@ async function main() {
     }
   } catch (error) {
     console.error(error)
+    process.exitCode = 1
   } finally {
     console.log("Finished")
-    pool.end()
+    await pool.end()
   }
 }
 

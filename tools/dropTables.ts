@@ -1,8 +1,6 @@
 import { pool } from "../db"
 
 async function main() {
-  pool.connect()
-
   try {
     await pool.query(`DROP TABLE balance`)
     await pool.query(`DROP TABLE keyword`)
@@ -12,9 +10,10 @@ async function main() {
     await pool.query(`DROP TABLE account`)
   } catch (error) {
     console.error(error)
+    process.exitCode = 1
   } finally {
     console.log("Finished")
-    pool.end()
+    await pool.end()
   }
 }
 
