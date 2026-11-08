@@ -29,7 +29,7 @@ This is a Node.js/Express REST API in TypeScript backed by **TimescaleDB** (Post
 
 Six tables managed via `tools/createTables.ts`:
 
-- `account` — bank accounts (name, currency)
+- `account` — bank accounts (name, currency, optional `icon_url`)
 - `transaction` — financial transactions; unique constraint on `(time, description, amount, account_id)` prevents duplicates on import
 - `balance` — account balance over time; a TimescaleDB **hypertable** partitioned by `time`
 - `category` — transaction categories
