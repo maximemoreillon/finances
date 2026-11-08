@@ -10,6 +10,8 @@ async function main() {
       currency VARCHAR(50),
       name VARCHAR(50)
     );`);
+    // Added after the initial schema: ADD COLUMN IF NOT EXISTS so existing databases get it too
+    await pool.query(`ALTER TABLE account ADD COLUMN IF NOT EXISTS icon_url TEXT;`);
 
     // Transactions
     // NOTE: Not hypertable

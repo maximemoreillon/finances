@@ -1,29 +1,25 @@
-import createHttpError from "http-errors"
-
 import { Request, Response } from "express"
 import { pool } from "../db"
+import { accountSchema, parseBody } from "../validation"
 
 export const createAccount = async (req: Request, res: Response) => {
-  const { name, currency } = req.body
-
-  if (!name) throw createHttpError(400, `Missing name`)
-  if (!currency) throw createHttpError(400, `Missing currency`)
+  const { name, currency, icon_url = null } = parseBody(accountSchema, req.body)
 
   const sql = `
-    INSERT INTO account(name, currency) 
-    VALUES($1, $2) 
+    INSERT INTO account(name, currency, icon_url) 
+    VALUES($1, $2, $3) 
     RETURNING *`
 
   const {
     rows: [account],
-  } = await pool.query(sql, [name, currency])
+  } = await pool.query(sql, [name, currency, icon_url])
 
   res.send(account)
 }
 
 export const readAccounts = async (req: Request, res: Response) => {
   const sql = `
-    SELECT id, name, currency, balance, transaction_count
+    SELECT id, name, currency, icon_url, balance, transaction_count
     FROM account 
 
     --- Adding latest balance
@@ -65,20 +61,20 @@ export const readAccount = async (req: Request, res: Response) => {
 
 export const updateAccount = async (req: Request, res: Response) => {
   const { account_id } = req.params
-  const { name, currency } = req.body
+  const { name, currency, icon_url } = parseBody(accountSchema, req.body)
 
-  if (!name) throw createHttpError(400, `Missing name`)
-  if (!currency) throw createHttpError(400, `Missing currency`)
+  // icon_url omitted: keep the current one, so clients unaware of icons don't wipe them
+  const keepIcon = icon_url === undefined
 
   const sql = `
     UPDATE account
-    SET name=$2, currency=$3
+    SET name=$2, currency=$3, icon_url=CASE WHEN $4 THEN icon_url ELSE $5 END
     WHERE id=$1
     RETURNING *`
 
   const {
     rows: [account],
-  } = await pool.query(sql, [account_id, name, currency])
+  } = await pool.query(sql, [account_id, name, currency, keepIcon, icon_url ?? null])
 
   res.send(account)
 }

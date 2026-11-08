@@ -41,6 +41,18 @@ export const exchangeRateQuerySchema = z.object({
   currency: z.string().regex(/^[A-Za-z]{3}$/, "Invalid currency code"),
 })
 
+// Account logo/icon. Empty string or null clears it; omitted leaves it unchanged on update
+const iconUrl = z.preprocess(
+  (value) => (value === "" ? null : value),
+  z.url({ protocol: /^https?$/ }).max(2048).nullable().optional(),
+)
+
+export const accountSchema = z.object({
+  name: z.string().max(50).refine((value) => value.trim().length > 0, "Missing name"),
+  currency: z.string().max(50).refine((value) => value.trim().length > 0, "Missing currency"),
+  icon_url: iconUrl,
+})
+
 export const parseBody = <T extends z.ZodType>(schema: T, body: unknown) => {
   const result = schema.safeParse(body)
   if (!result.success)
